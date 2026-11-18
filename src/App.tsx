@@ -109,14 +109,14 @@ function TopBar({ s, onPause, onAbout }: { s: Session; onPause: () => void; onAb
           <span className="font-serif text-lg font-semibold">Range Lab</span>
         </div>
 
-        <ol className="m-0 flex flex-1 list-none flex-wrap items-stretch gap-1 p-0" aria-label="Progress">
+        <ol className="order-last m-0 grid w-full list-none grid-cols-4 gap-1 p-0 lg:order-none lg:w-auto lg:flex-1" aria-label="Progress">
           {STAGES.map((stage, i) => {
             const state = current === stage.id ? 'now' : currentIndex > i ? 'done' : 'todo'
             return (
               <li
                 key={stage.id}
                 aria-current={state === 'now' ? 'step' : undefined}
-                className={`min-w-[104px] flex-1 border-t-[3px] px-2 pt-1 ${state === 'now' ? 'border-accent' : state === 'done' ? 'border-ink' : 'border-rule'}`}
+                className={`min-w-0 border-t-[3px] px-2 pt-1 ${state === 'now' ? 'border-accent' : state === 'done' ? 'border-ink' : 'border-rule'}`}
               >
                 <span className={`block text-[13px] leading-tight ${state === 'now' ? 'font-semibold' : state === 'todo' ? 'text-muted' : ''}`}>
                   {state === 'done' ? '✓ ' : ''}
@@ -130,7 +130,7 @@ function TopBar({ s, onPause, onAbout }: { s: Session; onPause: () => void; onAb
           })}
         </ol>
 
-        <div className="flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-3">
           <div className="text-right" aria-label="Active time used">
             <span className={`num block text-lg font-semibold leading-none ${over ? 'text-accent-dark' : ''}`}>
               {fmtTime(s.elapsed)}
