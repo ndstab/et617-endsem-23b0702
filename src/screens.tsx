@@ -2,6 +2,7 @@
 // and sends actions to the reducer in store.ts.
 
 import { useState, type Dispatch, type ReactNode } from 'react'
+import Hero from './Hero'
 import Lab from './Lab'
 import { askCoach } from './coach'
 import { BUDGET, CHALLENGE, EXTENSION, IDENTITY, MISSIONS, OUTCOMES, PERSONA, STAGE_LABEL, type MissionId, type StageId } from './content'
@@ -176,82 +177,79 @@ export function Home({ s, dispatch }: P) {
   const inProgress = s.step !== 'home'
   const trialCount = s.m1.trials.length + s.m2.trials.length + s.ch.trials.length
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
-      <div>
-        <Heading kicker="Projectile motion · Class 11" title="Range Lab">
-          <p>
-            You already know R = u² sin 2θ / g. This lab is about what you do with it when nobody hands you the numbers. You predict first, the bench decides, and you explain what you saw.
-          </p>
-        </Heading>
-
-        {inProgress ? (
-          <div className="sheet boxed">
-            <p className="label">Saved session</p>
-            <p className="mt-1 text-lg">
-              You stopped at <strong>{STEP_LABEL[s.step]}</strong>, {trialCount} trial{trialCount === 1 ? '' : 's'} recorded, <span className="num">{fmtTime(s.elapsed)}</span> used.
-            </p>
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <button className="btn btn-primary" onClick={() => dispatch({ type: 'resume' })}>
-                Resume
-              </button>
-              {confirm ? (
-                <>
-                  <span className="text-sm">This clears your trials and hypotheses.</span>
-                  <button className="btn" onClick={() => dispatch({ type: 'start' })}>
-                    Yes, start over
-                  </button>
-                  <button className="btn btn-quiet" onClick={() => setConfirm(false)}>
-                    Cancel
-                  </button>
-                </>
-              ) : (
-                <button className="btn" onClick={() => setConfirm(true)}>
-                  Start over
-                </button>
-              )}
-            </div>
-          </div>
-        ) : (
-          <button className="btn btn-primary px-6" onClick={() => dispatch({ type: 'start' })}>
-            Start the 10 minutes
-          </button>
-        )}
-
-        <p className="mt-4 max-w-xl text-sm text-muted">
-          The clock counts active time only. It stops when you hit Pause &amp; leave or switch tabs, and everything is saved on this device, so you can do Mission 1 now and the rest after your next problem set.
-        </p>
+    <div>
+      <div className="mb-7">
+        <Hero />
       </div>
+      <div className="grid gap-x-10 gap-y-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+        <div className="rise">
+          <p className="label">Projectile motion · Class 11 · 10 minutes</p>
+          <h1 className="mt-1 text-[40px] leading-[1.05]">You know the formula. Do you know when it lies?</h1>
+          <p className="mt-3 max-w-xl text-[17px]">
+            You can already write R = u² sin 2θ / g. This lab is about what you do when nobody hands you the numbers. You predict first, the bench decides, and you explain what you saw.
+          </p>
 
-      <div className="sheet">
-        <MiniBench
-          h={0}
-          xMax={98}
-          yMax={46}
-          shots={[
-            { u: 30, angle: 75, cls: 'fig-accent draw', label: '' },
-            { u: 30, angle: 45, cls: 'fig-accent draw d2', label: '91.7 m' },
-            { u: 30, angle: 15, cls: 'fig-accent draw d3', label: '45.9 m' },
-          ]}
-          caption="Three launches at 30 m/s: 75°, 45° and 15°. Two of them land on the same spot. By the end you will be able to say why."
-        />
-        <p className="label mb-2 mt-5">One sequence, 10 minutes</p>
-        <ol className="m-0 list-none p-0">
-          {(Object.keys(BUDGET) as StageId[]).map((id, i) => (
-            <li key={id} className="flex items-baseline gap-3 border-b border-rule py-2 last:border-0">
-              <span className="num w-5 text-muted">{i + 1}</span>
-              <span className="flex-1">
-                <span className="font-semibold">{STAGE_LABEL[id]}</span>
-                <span className="block text-sm text-muted">
-                  {id === 'm1' && 'Predict what doubling the speed does. Test it. Explain it.'}
-                  {id === 'm2' && 'Find the best angle from a 12 m cliff. It may not be the one you expect.'}
-                  {id === 'ch' && 'Two transfer tasks, one of them on the bench.'}
-                  {id === 'db' && 'Your hypotheses, first version to last, and one problem to take away.'}
+          {inProgress ? (
+            <div className="sheet boxed mt-5">
+              <p className="label">Saved session</p>
+              <p className="mt-1 text-lg">
+                You stopped at <strong>{STEP_LABEL[s.step]}</strong>, {trialCount} trial{trialCount === 1 ? '' : 's'} recorded, <span className="num">{fmtTime(s.elapsed)}</span> used.
+              </p>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button className="btn btn-primary" onClick={() => dispatch({ type: 'resume' })}>
+                  Resume
+                </button>
+                {confirm ? (
+                  <>
+                    <span className="text-sm">This clears your trials and hypotheses.</span>
+                    <button className="btn" onClick={() => dispatch({ type: 'start' })}>
+                      Yes, start over
+                    </button>
+                    <button className="btn btn-quiet" onClick={() => setConfirm(false)}>
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button className="btn" onClick={() => setConfirm(true)}>
+                    Start over
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <button className="btn btn-primary btn-big mt-5" onClick={() => dispatch({ type: 'start' })}>
+              Start the 10 minutes
+              <svg width="18" height="12" viewBox="0 0 18 12" aria-hidden="true">
+                <path d="M0 6h15M10 1l5 5-5 5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+              </svg>
+            </button>
+          )}
+
+          <p className="mt-4 max-w-xl text-[15px] text-muted">
+            The clock counts active time only. It stops when you hit Pause &amp; leave or switch tabs, and everything is saved on this device, so you can do Mission 1 now and the rest after your next problem set.
+          </p>
+        </div>
+
+        <div className="sheet rise r2">
+          <p className="label mb-1">One sequence, 10 minutes</p>
+          <ol className="m-0 list-none p-0">
+            {(Object.keys(BUDGET) as StageId[]).map((id, i) => (
+              <li key={id} className="plan-row flex items-baseline gap-3 border-b border-rule py-2.5 last:border-0" style={{ animationDelay: `${0.25 + i * 0.09}s` }}>
+                <span className="num w-5 text-muted">{i + 1}</span>
+                <span className="flex-1">
+                  <span className="font-semibold">{STAGE_LABEL[id]}</span>
+                  <span className="block text-[15px] text-muted">
+                    {id === 'm1' && 'Predict what doubling the speed does. Test it. Explain it.'}
+                    {id === 'm2' && 'Find the best angle from a 12 m cliff. It may not be the one you expect.'}
+                    {id === 'ch' && 'Two transfer tasks, one of them on the bench.'}
+                    {id === 'db' && 'Your hypotheses, first version to last, and one problem to take away.'}
+                  </span>
                 </span>
-              </span>
-              <span className="num text-sm">{fmtTime(BUDGET[id])}</span>
-            </li>
-          ))}
-        </ol>
+                <span className="num text-sm">{fmtTime(BUDGET[id])}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
       </div>
     </div>
   )

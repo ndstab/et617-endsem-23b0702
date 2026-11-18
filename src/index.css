@@ -423,3 +423,44 @@ table.trials tr.row-new td {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ----- home page ----- */
+.hero {
+  border: 1px solid var(--color-ink);
+  animation: screen-in 0.4s ease-out;
+}
+.hero-trail {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+}
+.hero-dot {
+  fill: var(--color-ink);
+  opacity: 0.55;
+}
+.hero-ball {
+  fill: var(--color-ink);
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+.rise {
+  animation: screen-in 0.5s ease-out 0.08s both;
+}
+.rise.r2 {
+  animation-delay: 0.2s;
+}
+.plan-row {
+  animation: slide-in 0.4s ease-out both;
+}
+.btn-big {
+  min-height: 50px;
+  padding: 0 22px;
+  font-size: 16px;
+  gap: 10px;
+}
+.btn-big svg {
+  transition: transform 0.15s ease-out;
+}
+.btn-big:hover svg {
+  transform: translateX(4px);
+}
