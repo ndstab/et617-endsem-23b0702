@@ -36,20 +36,30 @@ export default function Lab({ start, locks, trials, onRecord, counts = () => tru
   const [progress, setProgress] = useState(0) // 0..1 along the flight
   const [column, setColumn] = useState<'none' | 'u' | 'u2' | 'sqrt'>('none')
   const frame = useRef(0)
+  const landTimer = useRef(0)
 
-  useEffect(() => () => cancelAnimationFrame(frame.current), [])
+  const stopAnimation = () => {
+    cancelAnimationFrame(frame.current)
+    clearTimeout(landTimer.current)
+  }
+  useEffect(() => stopAnimation, [])
 
   const set = (key: keyof Vars, value: number) => {
-    cancelAnimationFrame(frame.current)
+    stopAnimation()
     setShot(null)
     setProgress(0)
     setVars((v) => ({ ...v, [key]: value }))
   }
 
   const launch = () => {
-    cancelAnimationFrame(frame.current)
+    stopAnimation()
     setShot(shoot(vars.u, vars.angle, vars.h))
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return setProgress(1)
+    // The ball always lands after 0.95 s, even if the browser pauses animation frames.
+    landTimer.current = window.setTimeout(() => {
+      cancelAnimationFrame(frame.current)
+      setProgress(1)
+    }, 950)
     const t0 = performance.now()
     const step = (now: number) => {
       const p = Math.min(1, (now - t0) / 900)

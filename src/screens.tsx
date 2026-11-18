@@ -383,17 +383,6 @@ export function LabScreen({ s, dispatch, mission }: P & { mission: MissionId }) 
         ))}
       </div>
 
-      {flags.length > 0 && (
-        <div className="mb-4 space-y-2" role="status">
-          {flags.map((f) => (
-            <p key={f.id} className="note m-0">
-              <strong>Check your experiment. </strong>
-              {f.text}
-            </p>
-          ))}
-        </div>
-      )}
-
       <Lab
         start={m.start}
         locks={m.locks}
@@ -403,6 +392,16 @@ export function LabScreen({ s, dispatch, mission }: P & { mission: MissionId }) 
         counts={(t) => isControlled(mission, t)}
         onRecord={(shot) => dispatch({ type: 'trial', scope: mission, shot })}
       />
+
+      {/* The app's response to HOW he experiments. Kept below the bench so the controls never jump. */}
+      <div className="mt-4 space-y-2" role="status" aria-live="polite">
+        {flags.map((f) => (
+          <p key={f.id} className="note m-0">
+            <strong>Check your experiment. </strong>
+            {f.text}
+          </p>
+        ))}
+      </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
         <Hints s={s} dispatch={dispatch} mission={mission} />
