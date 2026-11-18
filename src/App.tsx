@@ -59,7 +59,7 @@ export default function App() {
         </div>
       )}
 
-      <main className="mx-auto w-full max-w-[1180px] flex-1 px-5 py-6">
+      <main key={s.view === 'about' ? 'about' : showHome ? 'home' : s.step} className="screen mx-auto w-full max-w-[1180px] flex-1 px-5 py-6">
         {s.view === 'about' ? (
           <About s={s} dispatch={dispatch} />
         ) : showHome ? (
@@ -116,13 +116,19 @@ function TopBar({ s, onPause, onAbout }: { s: Session; onPause: () => void; onAb
               <li
                 key={stage.id}
                 aria-current={state === 'now' ? 'step' : undefined}
-                className={`min-w-0 border-t-[3px] px-2 pt-1 ${state === 'now' ? 'border-accent' : state === 'done' ? 'border-ink' : 'border-rule'}`}
+                className="min-w-0 px-0.5"
               >
+                <span className="mb-1 block h-[3px] bg-rule">
+                  <span
+                    className={`stage-fill block h-full ${state === 'done' ? 'bg-ink' : s.stageTime[stage.id] > BUDGET[stage.id] ? 'bg-bad' : 'bg-accent'}`}
+                    style={{ width: state === 'done' ? '100%' : state === 'now' ? `${Math.max(4, Math.min(100, (100 * s.stageTime[stage.id]) / BUDGET[stage.id]))}%` : '0%' }}
+                  />
+                </span>
                 <span className={`block text-[13px] leading-tight ${state === 'now' ? 'font-semibold' : state === 'todo' ? 'text-muted' : ''}`}>
                   {state === 'done' ? '✓ ' : ''}
                   {stage.name}
                 </span>
-                <span className={`num block text-[11px] ${s.stageTime[stage.id] > BUDGET[stage.id] ? 'text-accent-dark' : 'text-muted'}`}>
+                <span className={`num block text-[11px] ${s.stageTime[stage.id] > BUDGET[stage.id] ? 'text-bad' : 'text-muted'}`}>
                   {fmtTime(s.stageTime[stage.id])} / {fmtTime(BUDGET[stage.id])}
                 </span>
               </li>
@@ -132,7 +138,7 @@ function TopBar({ s, onPause, onAbout }: { s: Session; onPause: () => void; onAb
 
         <div className="ml-auto flex items-center gap-3">
           <div className="text-right" aria-label="Active time used">
-            <span className={`num block text-lg font-semibold leading-none ${over ? 'text-accent-dark' : ''}`}>
+            <span className={`num block text-lg font-semibold leading-none ${over ? 'text-bad' : ''}`}>
               {fmtTime(s.elapsed)}
               <span className="text-sm font-normal text-muted"> / 10:00</span>
             </span>

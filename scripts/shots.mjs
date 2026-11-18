@@ -27,7 +27,7 @@ const click = async (text, exact = false) => {
     exact,
   )
   if (!ok) throw new Error('button not clickable: ' + text)
-  await sleep(250)
+  await sleep(350)
 }
 const type = async (selector, index, value) => {
   const els = await page.$$(selector)
@@ -51,7 +51,7 @@ const shot = async ({ u, angle, h }) => {
   if (h != null) await slide('Height h', h)
   await sleep(80)
   await click('Launch')
-  await sleep(1150)
+  await sleep(1900)
   await click('Record trial')
 }
 const snap = async (name, full = true) => {
@@ -82,7 +82,7 @@ await click('I have enough data')
 await click('u²', true)
 await type('textarea', 0, 'Doubling u doubles the horizontal velocity and also doubles the time in the air, and range is the product of the two.')
 await click('Submit conclusion')
-await page.waitForFunction(() => document.body.innerText.includes('Model explanation'), { timeout: 12000 })
+await page.waitForFunction(() => /model explanation/i.test(document.body.innerText), { timeout: 12000 })
 await sleep(300)
 log('CORRECT coach:', await text('section[aria-live]'))
 await snap('correct')
@@ -107,7 +107,7 @@ await click('Submit conclusion')
 await page.waitForFunction(() => document.querySelector('section[aria-live]'), { timeout: 12000 })
 await sleep(300)
 log('M1 coach:', await text('section[aria-live]'))
-log('M1 model answer visible (must be false):', await page.evaluate(() => document.body.innerText.includes('Model explanation')))
+log('M1 model answer visible (must be false):', await page.evaluate(() => /model explanation/i.test(document.body.innerText)))
 await snap('misconception')
 
 // C4: pause, close, reopen -> resume card
@@ -123,7 +123,7 @@ await click('u²', true)
 await type('textarea', 0, 'Both the horizontal velocity and the time in the air double, so their product is four times.')
 await type('textarea', 1, 'Range goes as u squared because horizontal velocity and flight time both scale with u')
 await click('Submit revised conclusion')
-await page.waitForFunction(() => document.body.innerText.includes('Model explanation'), { timeout: 12000 })
+await page.waitForFunction(() => /model explanation/i.test(document.body.innerText), { timeout: 12000 })
 await snap('revised')
 await click('On to Mission 2')
 
@@ -156,7 +156,7 @@ await click('below 45°', true)
 await type('textarea', 0, 'From a height the ball keeps moving forward during the extra fall time, so more horizontal velocity pays off and a flatter angle wins.')
 await type('textarea', 1, 'From a height the best angle is below 45 because the fall adds time in the air')
 await click('Submit revised conclusion')
-await page.waitForFunction(() => document.body.innerText.includes('Model explanation'), { timeout: 12000 })
+await page.waitForFunction(() => /model explanation/i.test(document.body.innerText), { timeout: 12000 })
 await click('On to the Challenge')
 
 // ---------- Challenge ----------

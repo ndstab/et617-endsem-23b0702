@@ -31,7 +31,7 @@ interface P {
 const VERDICT_TAG: Record<Verdict, { text: string; cls: string }> = {
   correct: { text: 'Holds', cls: 'bg-okbg text-ok' },
   partial: { text: 'Half way', cls: 'bg-warnbg text-warn' },
-  misconception: { text: 'Refuted by your data', cls: 'bg-[#fbe3da] text-accent-dark' },
+  misconception: { text: 'Refuted by your data', cls: 'bg-[#fbe3da] text-bad' },
   other: { text: 'Not supported yet', cls: 'bg-warnbg text-warn' },
 }
 
@@ -45,7 +45,7 @@ function Heading({ kicker, title, children }: { kicker: string; title: string; c
     <header className="mb-4">
       <p className="label">{kicker}</p>
       <h1 className="mt-1 text-[26px]">{title}</h1>
-      {children && <div className="mt-2 max-w-3xl text-[15px]">{children}</div>}
+      {children && <div className="mt-2 max-w-3xl text-[16px]">{children}</div>}
     </header>
   )
 }
@@ -81,7 +81,7 @@ function MiniBench(props: { h: number; shots: { u: number; angle: number; cls: s
           })
           return (
             <g key={i}>
-              <path d={'M' + pts.join(' L')} className={sh.cls} />
+              <path d={'M' + pts.join(' L')} className={sh.cls} pathLength={sh.cls.includes('draw') ? 1 : undefined} />
               {sh.label && (
                 <>
                   <line x1={sx(shot.range)} x2={sx(shot.range)} y1={gy} y2={gy + 5} className="ink-line" />
@@ -115,7 +115,7 @@ function ScenarioFigure({ mission }: { mission: MissionId }) {
         h={0}
         xMax={150}
         yMax={24}
-        shots={[{ u: 20, angle: 30, cls: 'fig-accent', label: '35.3 m' }]}
+        shots={[{ u: 20, angle: 30, cls: 'fig-accent draw', label: '35.3 m' }]}
         mark={{ x: 105, text: '40 m/s lands … ?' }}
         caption="Fig. 1 · Same 30° launch. The solid curve is 20 m/s. Where does 40 m/s land?"
       />
@@ -223,7 +223,18 @@ export function Home({ s, dispatch }: P) {
       </div>
 
       <div className="sheet">
-        <p className="label mb-2">One sequence, 10 minutes</p>
+        <MiniBench
+          h={0}
+          xMax={98}
+          yMax={46}
+          shots={[
+            { u: 30, angle: 75, cls: 'fig-accent draw', label: '' },
+            { u: 30, angle: 45, cls: 'fig-accent draw d2', label: '91.7 m' },
+            { u: 30, angle: 15, cls: 'fig-accent draw d3', label: '45.9 m' },
+          ]}
+          caption="Three launches at 30 m/s: 75°, 45° and 15°. Two of them land on the same spot. By the end you will be able to say why."
+        />
+        <p className="label mb-2 mt-5">One sequence, 10 minutes</p>
         <ol className="m-0 list-none p-0">
           {(Object.keys(BUDGET) as StageId[]).map((id, i) => (
             <li key={id} className="flex items-baseline gap-3 border-b border-rule py-2 last:border-0">
@@ -342,7 +353,7 @@ function Hints({ s, dispatch, mission }: P & { mission: MissionId }) {
         </button>
       </div>
       {level > 0 && (
-        <ol className="mt-2 space-y-1.5 pl-5 text-[15px]">
+        <ol className="mt-2 space-y-1.5 pl-5 text-[16px]">
           {hints.slice(0, level).map((h, i) => (
             <li key={i}>{h}</li>
           ))}
@@ -391,19 +402,20 @@ export function LabScreen({ s, dispatch, mission }: P & { mission: MissionId }) 
         ratioColumns={mission === 'm1'}
         counts={(t) => isControlled(mission, t)}
         onRecord={(shot) => dispatch({ type: 'trial', scope: mission, shot })}
+        aside={
+          /* The app's response to HOW he experiments, as margin notes. In the margin so the controls never jump. */
+          <div className="space-y-2" role="status" aria-live="polite">
+            {flags.length > 0 && <p className="label">Notes on your method</p>}
+            {flags.map((f) => (
+              <p key={f.id} className="note m-0">
+                {f.text}
+              </p>
+            ))}
+          </div>
+        }
       />
 
-      {/* The app's response to HOW he experiments. Kept below the bench so the controls never jump. */}
-      <div className="mt-4 space-y-2" role="status" aria-live="polite">
-        {flags.map((f) => (
-          <p key={f.id} className="note m-0">
-            <strong>Check your experiment. </strong>
-            {f.text}
-          </p>
-        ))}
-      </div>
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+      <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
         <Hints s={s} dispatch={dispatch} mission={mission} />
         <div className="flex flex-col items-start gap-1.5 lg:items-end">
           <button className="btn btn-primary" disabled={!done} onClick={() => dispatch({ type: 'goto', step: interpret })}>
@@ -481,10 +493,10 @@ export function Interpret({ s, dispatch, mission }: P & { mission: MissionId }) 
     <div>
       <Heading kicker={`${m.title} · Interpret & revise`} title={gap.refuted ? 'Your prediction did not survive' : 'Your prediction held'} />
 
-      <section className={`sheet boxed mb-5 ${gap.refuted ? 'border-accent' : 'border-ok'}`} aria-label="Prediction gap">
+      <section className={`sheet boxed mb-5 ${gap.refuted ? 'border-bad' : 'border-ok'}`} aria-label="Prediction gap">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="label">Prediction gap</p>
-          <span className={`rounded px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${gap.refuted ? 'bg-[#fbe3da] text-accent-dark' : 'bg-okbg text-ok'}`}>
+          <span className={`rounded px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${gap.refuted ? 'bg-[#fbe3da] text-bad' : 'bg-okbg text-ok'}`}>
             {gap.refuted ? 'Prediction refuted' : 'Prediction confirmed'}
           </span>
         </div>
@@ -496,11 +508,26 @@ export function Interpret({ s, dispatch, mission }: P & { mission: MissionId }) 
           </div>
           <div>
             <p className="text-sm text-muted">You measured</p>
-            <p className={`num text-[28px] font-semibold leading-tight ${gap.refuted ? 'text-accent-dark' : 'text-ok'}`}>{gap.measured}</p>
+            <p className={`num text-[28px] font-semibold leading-tight ${gap.refuted ? 'text-bad' : 'text-ok'}`}>{gap.measured}</p>
             {gap.rows && <p className="num text-sm">{gap.rows}</p>}
           </div>
         </div>
-        <p className="mt-3 border-t border-rule pt-3 text-[15px]">
+        {gap.bars && (
+          <div className="mt-3 space-y-1.5" aria-hidden="true">
+            {[
+              { name: 'predicted', value: gap.bars.predicted, cls: 'bg-ink' },
+              { name: 'measured', value: gap.bars.measured, cls: gap.refuted ? 'bg-bad' : 'bg-ok' },
+            ].map((b) => (
+              <div key={b.name} className="flex items-center gap-2">
+                <span className="num w-[74px] text-xs text-muted">{b.name}</span>
+                <div className="flex-1">
+                  <div className={`gap-bar ${b.cls}`} style={{ width: `${Math.max(2, (100 * b.value) / Math.max(gap.bars!.predicted, gap.bars!.measured))}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <p className="mt-3 border-t border-rule pt-3 text-[16px]">
           {gap.refuted && ms.confidence === 'high' && <strong>You were sure, which makes this worth your time. </strong>}
           {gap.question}
         </p>
@@ -551,7 +578,7 @@ export function Interpret({ s, dispatch, mission }: P & { mission: MissionId }) 
                 <Tag verdict={coach.verdict} />
               </div>
               <p className="mt-2 font-semibold">{coach.line}</p>
-              <p className="mt-1 text-[15px]">{coach.question}</p>
+              <p className="mt-1 text-[16px]">{coach.question}</p>
               {coach.suggest && (
                 <p className="mt-2 text-sm">
                   <span className="label">Try next </span>
@@ -570,7 +597,7 @@ export function Interpret({ s, dispatch, mission }: P & { mission: MissionId }) 
           {ms.resolved && (
             <section className="sheet boxed">
               <p className="label">{ms.verdict === 'correct' ? 'Model explanation' : 'Model explanation, using your own table'}</p>
-              <p className="mt-1.5 text-[15px]">{ms.verdict === 'correct' || ms.verdict === 'partial' ? m.modelAnswer : modelFromOwnRows(mission, ms.trials)}</p>
+              <p className="mt-1.5 text-[16px]">{ms.verdict === 'correct' || ms.verdict === 'partial' ? m.modelAnswer : modelFromOwnRows(mission, ms.trials)}</p>
               {mission === 'm1' && (
                 <div className="mt-3">
                   <AreaFigure />
@@ -635,15 +662,15 @@ export function Challenge({ s, dispatch }: P) {
             {ch.t5Verdict && (
               <div>
                 <Tag verdict={ch.t5Verdict} />
-                <p className="mt-1.5 text-[15px]">{t5.feedback[ch.t5Verdict === 'partial' ? 'other' : ch.t5Verdict]}</p>
-                {ch.t5Verdict !== 'correct' && ch.t5Attempts >= 2 && <p className="mt-1.5 text-[15px]"><span className="label">Model answer </span>{t5.model}</p>}
+                <p className="mt-1.5 text-[16px]">{t5.feedback[ch.t5Verdict === 'partial' ? 'other' : ch.t5Verdict]}</p>
+                {ch.t5Verdict !== 'correct' && ch.t5Attempts >= 2 && <p className="mt-1.5 text-[16px]"><span className="label">Model answer </span>{t5.model}</p>}
               </div>
             )}
           </form>
 
           <div className={`sheet space-y-3 ${t5Open ? '' : 'opacity-50'}`}>
             <p className="label">Follow-up</p>
-            <p className="text-[15px]">{t5.followPrompt}</p>
+            <p className="text-[16px]">{t5.followPrompt}</p>
             <div className="flex gap-2">
               {(['yes', 'no'] as const).map((v) => (
                 <button key={v} className="choice" disabled={!t5Open || ch.t5Follow !== null} aria-pressed={ch.t5Follow === v} onClick={() => dispatch({ type: 't5follow', answer: v })}>
@@ -653,8 +680,8 @@ export function Challenge({ s, dispatch }: P) {
             </div>
             {ch.t5Follow && (
               <div>
-                <Tag verdict={ch.t5Follow === 'no' ? 'correct' : 'misconception'} />
-                <p className="mt-1.5 text-[15px]">{ch.t5Follow === 'no' ? t5.followFeedback.correct : t5.followFeedback.misconception}</p>
+                <Tag verdict={ch.t5Follow === 'no' ? 'correct' : 'other'} />
+                <p className="mt-1.5 text-[16px]">{ch.t5Follow === 'no' ? t5.followFeedback.correct : t5.followFeedback.misconception}</p>
               </div>
             )}
             <div className="border-t border-rule pt-3">
@@ -670,7 +697,7 @@ export function Challenge({ s, dispatch }: P) {
             <span className="label">Hits </span>
             <strong className="num">{hits.length > 0 ? hits.map((a) => a + '°').join(' and ') : 'none yet'}</strong>
           </p>
-          <p className="m-0 flex-1 text-[15px]">
+          <p className="m-0 flex-1 text-[16px]">
             {done6
               ? t6.feedback.correct
               : hits.length === 1
@@ -740,7 +767,7 @@ export function Debrief({ s, dispatch }: P) {
                 <>
                   <ol className="mt-2 space-y-1.5 pl-0">
                     {ms.hypotheses.map((h, i) => (
-                      <li key={i} className="flex gap-2 text-[15px]">
+                      <li key={i} className="flex gap-2 text-[16px]">
                         <span className="num shrink-0 text-muted">{i === 0 ? 'v1' : `v${i + 1}`}</span>
                         <span className={i < ms.hypotheses.length - 1 ? 'text-muted line-through decoration-rule' : 'font-medium'}>{h}</span>
                       </li>
@@ -758,7 +785,7 @@ export function Debrief({ s, dispatch }: P) {
                   </dl>
                 </>
               )}
-              <p className="mt-3 border-t border-rule pt-3 text-[15px]">
+              <p className="mt-3 border-t border-rule pt-3 text-[16px]">
                 <span className="label">Model explanation </span>
                 {m.modelAnswer}
               </p>
@@ -777,7 +804,7 @@ export function Debrief({ s, dispatch }: P) {
               yMax={16}
               shots={[
                 { u: 10, angle: 45, cls: 'fig-dash', label: '17.3' },
-                { u: 10, angle: 29, cls: 'fig-accent', label: '18.7 m' },
+                { u: 10, angle: 29, cls: 'fig-accent draw', label: '18.7 m' },
               ]}
               caption="Fig. 4 · From 12 m at 10 m/s: 29° (solid) out-throws 45° (dashed). The flatter shot spends the fall moving forward faster."
             />
@@ -805,7 +832,7 @@ export function Debrief({ s, dispatch }: P) {
           </table>
 
           <p className="label mt-5">Take away</p>
-          <p className="mt-1 text-[15px]">{EXTENSION.prompt}</p>
+          <p className="mt-1 text-[16px]">{EXTENSION.prompt}</p>
           <button className="btn mt-2" onClick={() => setShow(!show)} aria-expanded={show}>
             {show ? 'Hide derivation result' : 'Show derivation result'}
           </button>

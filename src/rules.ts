@@ -185,6 +185,8 @@ export interface GapCard {
   measured: string
   rows: string | null
   question: string
+  /** Mission 1 only: the two ranges, drawn as bars. */
+  bars?: { predicted: number; measured: number }
 }
 
 /** The prediction gap card: his prediction next to his own measurement, plus one pointing question. */
@@ -200,7 +202,7 @@ export function gapCard(mission: MissionId, ms: MissionState): GapCard {
         : ms.predVerdict === 'misconception'
           ? 'Your model says range follows speed. Range is horizontal speed × time in the air. Which of those did you assume stays the same when u doubles?'
           : `You were off by a factor of ${hit ? f1(Math.max(hit.range, p) / Math.max(Math.min(hit.range, p), 0.1)) : '?'}. What did your model assume about how range depends on u?`
-    return { refuted: ms.predVerdict !== 'correct', predicted: `${f1(p)} m`, measured, rows, question }
+    return { refuted: ms.predVerdict !== 'correct', predicted: `${f1(p)} m`, measured, rows, question, bars: hit ? { predicted: p, measured: hit.range } : undefined }
   }
   const best = controlledTrials(mission, ms.trials).reduce<Trial | null>((a, b) => (!a || b.range > a.range ? b : a), null)
   const measured = hit ? `${f1(hit.range)} m at ${hit.angle}°` : 'not measured'
