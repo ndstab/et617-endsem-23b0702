@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Range Lab · design directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:32px;min-width:1164px;background:#e4e3de;color:#191919;font:14px/1.45 var(--sans)}
+.page{width:1100px;margin:0 auto}
+.page-h h1{margin:0 0 4px;font-size:22px;font-weight:600;letter-spacing:-.01em}
+.page-h p{margin:0;color:#555}
+.dir-h{display:flex;align-items:baseline;gap:16px;margin:48px 0 12px;padding-top:12px;border-top:1px solid #191919}
+.dir-h h2{margin:0;font-size:30px;font-weight:600;letter-spacing:-.015em;white-space:nowrap}
+.dir-h p{margin:0;color:#444;font-size:15px}
+
+/* ---------- figure primitives (shared geometry, themed by custom properties) ---------- */
+.g-grid{stroke:var(--grid,transparent);stroke-width:.5;fill:none}
+.g-grid2{stroke:var(--grid2,transparent);stroke-width:.5;fill:none}
+.g-ground{stroke:var(--axis);stroke-width:var(--sw-axis,1);fill:none}
+.g-tick{stroke:var(--axis);stroke-width:.75;fill:none}
+.g-lab{fill:var(--lab);font-family:var(--num);font-size:var(--fs,10px)}
+.g-lab2{fill:var(--lab);font-family:var(--num);font-size:var(--fs2,10px)}
+.g-ghost{stroke:var(--ghost);stroke-width:var(--sw-ghost,1);stroke-dasharray:var(--ghost-dash,none);fill:none}
+.g-ghm{fill:var(--bench-bg);stroke:var(--ghost);stroke-width:1}
+.g-ghl{fill:var(--ghost-lab);font-family:var(--num);font-size:var(--fs,10px)}
+.g-glow{stroke:var(--live);stroke-width:var(--glow-w,0);opacity:.16;fill:none;stroke-linecap:round}
+.g-live{stroke:var(--live);stroke-width:var(--sw-live,1.6);fill:none}
+.g-peak{stroke:var(--live);stroke-width:.6;stroke-dasharray:2 3;fill:none}
+.g-ball{fill:var(--live)}
+.g-livel{fill:var(--live-lab);font-family:var(--num);font-size:var(--fs,10px);font-weight:600}
+.g-launch{fill:var(--launch-fill);stroke:var(--axis);stroke-width:1}
+.g-aim{stroke:var(--axis);stroke-width:1;fill:none}
+.g-aimh{fill:var(--axis)}
+.g-arc{stroke:var(--axis);stroke-width:.75;fill:none}
+.g-pt{fill:var(--bench-bg);stroke:var(--ghost);stroke-width:1.3}
+.g-ptl{fill:var(--live)}
+
+/* ---------- shared structure ---------- */
+.frame{width:1100px}
+.bar{display:flex;align-items:center;gap:20px}
+.brand{white-space:nowrap}
+.steps{display:flex;flex:1;list-style:none;margin:0;padding:0}
+.steps li{white-space:nowrap}
+.s-top{display:flex;gap:8px;align-items:baseline}
+.s-sub{display:flex;gap:10px;font-size:11px}
+.s-sub i{font-style:normal}
+.s-t,.timer,.ctl-v,.ctl-r,td,dd,.chip b,.gap-nums b,.gap-rows b,.foot{font-family:var(--num);font-variant-numeric:tabular-nums}
+.timer{white-space:nowrap}
+.btn{font:inherit;cursor:pointer;padding:7px 14px;white-space:nowrap;color:inherit}
+.about{color:inherit}
+.main{display:grid}
+.a-brief{grid-area:brief}.a-bench{grid-area:bench}.a-ctl{grid-area:ctl}.a-read{grid-area:read}
+.a-table{grid-area:table}.a-plot{grid-area:plot}.a-note{grid-area:note}.a-gap{grid-area:gap}
+.brief{display:flex;gap:24px;align-items:flex-start;justify-content:space-between}
+.brief p{margin:0;max-width:74ch}
+.chip{white-space:nowrap}
+.chip b{font-weight:600}
+figure{margin:0}
+.bench svg,.a-plot svg{display:block;width:100%;height:auto}
+.lab{margin:0;font-size:12px;font-weight:600}
+.ctl-h{display:flex;justify-content:space-between;align-items:baseline}
+.ctl-l i{font-style:italic}
+.ctl-v em{font-style:normal}
+.lock{vertical-align:-1px;margin-right:2px}
+.track{position:relative;height:16px;margin:5px 0 1px}
+.track::before{content:"";position:absolute;left:0;right:0;top:50%;height:var(--trk-h);margin-top:calc(var(--trk-h) / -2);background:var(--trk)}
+.fill{position:absolute;left:0;top:50%;height:var(--fill-h);margin-top:calc(var(--fill-h) / -2);background:var(--trk-fill)}
+.thumb{position:absolute;top:50%;transform:translate(-50%,-50%)}
+.ctl-r{display:flex;justify-content:space-between;font-size:10.5px}
+.acts{display:flex;gap:8px}
+.acts .btn{flex:1}
+.read{display:flex;margin:0}
+.read dt{font-size:11.5px}
+.read dd{margin:0}
+.read dd span{font-size:.6em}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600}
+.table-h{display:flex;justify-content:space-between;align-items:center}
+.addcol{display:flex;align-items:center;gap:8px;font-size:12px}
+.sel{display:inline-flex;align-items:center;gap:10px;padding:3px 8px;cursor:pointer}
+.note{margin:0}
+.gap-top{display:flex;justify-content:space-between;align-items:baseline}
+.gap-body{display:grid;grid-template-columns:auto 1fr;gap:48px;align-items:start}
+.gap-nums{display:flex;gap:40px}
+.gap-nums span{display:block;font-size:12px}
+.gap-nums b{display:block;line-height:1.1;white-space:nowrap}
+.gap-rows{margin:12px 0 0}
+.gap-q{margin:0;max-width:52ch}
+
+/* =====================================================================
+   A · Lab notebook
+   ===================================================================== */
+.dA{
+  --paper:#f6f1e6;--sheet:#fbf8f1;--ink:#1e1c19;--ink2:#655f55;--rule:#cdc4b0;
+  --live:#d43d27;--ghost:#8d8981;--num:var(--mono);
+  --grid:#e9e2d2;--grid2:#d8cfbb;--axis:#1e1c19;--lab:#655f55;--bench-bg:#fbf8f1;
+  --ghost-lab:#6f6b64;--live-lab:#b8321e;--launch-fill:#fbf8f1;
+  --sw-live:1.4;--sw-ghost:.9;--fs:8.5px;--fs2:9.5px;
+  --trk-h:1px;--fill-h:3px;--trk:#8d8981;--trk-fill:#1e1c19;
+  background:var(--paper);color:var(--ink);border:1px solid #b9af98;
+  font:14px/1.45 "Source Sans 3",var(--sans);
+}
+.dA .bar{padding:10px 28px;border-bottom:1px solid var(--ink)}
+.dA .brand{font:600 21px/1 Fraunces,Georgia,serif;letter-spacing:-.01em}
+.dA .steps{margin-left:12px}
+.dA .steps li{padding:2px 16px 4px;border-left:1px solid var(--rule);color:var(--ink2);font-size:13px}
+.dA .steps li.on{color:var(--ink);font-weight:600;border-bottom:2px solid var(--ink)}
+.dA .s-t{font-size:12px;font-weight:400}
+.dA .s-sub{font:italic 400 12px Fraunces,Georgia,serif;color:var(--ink2)}
+.dA .s-sub b{color:var(--ink);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.dA .timer{font-size:15px;font-weight:500}
+.dA .timer span{color:var(--ink2);font-weight:400}
+.dA .btn{background:var(--sheet);border:1px solid var(--ink);border-radius:3px;box-shadow:0 2px 0 var(--ink)}
+.dA .btn.pri{background:var(--ink);color:var(--paper);box-shadow:0 2px 0 #000;font-weight:600}
+.dA .about{font-size:13px;text-underline-offset:3px}
+.dA .main{grid-template-columns:290px 1fr 270px;gap:20px 28px;padding:18px 28px 24px;
+  grid-template-areas:"brief brief brief" "bench bench bench" "ctl table plot" "read note plot" "gap gap gap"}
+.dA .brief p{font-size:15.5px}
+.dA .brief p strong{font:600 15.5px Fraunces,Georgia,serif}
+.dA .chip{border:1px solid var(--ink);border-radius:3px;padding:5px 10px;background:var(--sheet);font-size:13px}
+.dA .bench{border:1px solid var(--rule);background:var(--sheet);padding:6px 6px 0}
+.dA figcaption{font:italic 12.5px Fraunces,Georgia,serif;color:var(--ink2);padding:4px 8px 8px;border-top:1px solid var(--rule);margin-top:4px}
+.dA .lab{font:600 16px Fraunces,Georgia,serif;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid var(--ink)}
+.dA .ctl{margin-bottom:10px}
+.dA .ctl-l{font-size:13.5px}
+.dA .ctl-v{font-size:13.5px;font-weight:500}
+.dA .ctl-v em{color:var(--ink2);font-weight:400}
+.dA .ctl-r{color:var(--ink2)}
+.dA .thumb{width:13px;height:13px;border-radius:50%;background:var(--paper);border:1.5px solid var(--ink)}
+.dA .locked .thumb{border-color:var(--ghost)}
+.dA .locked .ctl-l,.dA .locked .ctl-v{color:var(--ink2)}
+.dA .acts{margin-top:14px}
+.dA .read{border-top:1px solid var(--ink);border-bottom:1px solid var(--rule)}
+.dA .read div{flex:1;padding:8px 10px 8px 0}
+.dA .read div+div{padding-left:10px;border-left:1px solid var(--rule)}
+.dA .read dt{color:var(--ink2)}
+.dA .read dd{font-size:21px;font-weight:500;letter-spacing:-.02em}
+.dA .read .live dd{color:var(--live-lab)}
+.dA .table-h{margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid var(--ink)}
+.dA .table-h .lab{margin:0;padding:0;border:0}
+.dA .sel{border:1px solid var(--ink2);border-radius:3px;background:var(--sheet);font-family:var(--mono);font-size:12px}
+.dA th{font-size:12px;color:var(--ink2);padding:2px 10px 6px;border-bottom:1px solid var(--rule)}
+.dA td{font-size:13.5px;padding:6px 10px;border-bottom:1px solid var(--rule)}
+.dA .cur td:first-child{box-shadow:inset 2px 0 0 var(--live)}
+.dA .cur .r{color:var(--live-lab);font-weight:600}
+.dA .calc{background:#f1ead9}
+.dA .note{background:#fbeecb;border-left:3px solid #c98a00;color:#4a3700;padding:9px 12px;font-size:14px;align-self:start}
+.dA .gap{border:1px solid var(--ink);background:var(--sheet);padding:14px 20px 18px;margin-top:4px}
+.dA .tag{font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--live-lab)}
+.dA .gap-pre{font-size:12px;color:var(--ink2);font-style:italic}
+.dA .gap-body{margin-top:10px}
+.dA .gap-nums span{color:var(--ink2)}
+.dA .gap-nums b{font:600 46px/1.1 Fraunces,Georgia,serif;letter-spacing:-.02em}
+.dA .gap-nums .meas b{color:var(--live)}
+.dA .gap-rows{font-size:14px;color:var(--ink2)}
+.dA .gap-rows b{color:var(--ink);font-weight:500}
+.dA .gap-q{font:400 18px/1.4 Fraunces,Georgia,serif;border-left:1px solid var(--rule);padding-left:24px}
+.dA .foot{padding:8px 28px;border-top:1px solid var(--rule);font-size:11px;color:var(--ink2)}
+
+/* =====================================================================
+   B · Instrument panel
+   ===================================================================== */
+.dB{
+  --bg:#0d1115;--panel:#131920;--line:#28323c;--ink:#d5dde5;--ink2:#8091a0;
+  --live:#ffb14a;--ghost:#6c8fb0;--num:var(--mono);
+  --grid:#161d25;--grid2:#212b35;--axis:#5d6e7e;--lab:#8091a0;--bench-bg:#090d11;
+  --ghost-lab:#8fb0cf;--live-lab:#ffc878;--launch-fill:#1c252e;
+  --sw-live:1.3;--sw-ghost:1;--glow-w:5;--fs:9.5px;--fs2:9.5px;
+  --trk-h:4px;--fill-h:4px;--trk:#28323c;--trk-fill:#8091a0;
+  background:var(--bg);color:var(--ink);border:1px solid #000;
+  font:12.5px/1.4 var(--mono);
+}
+.dB .bar{gap:0;border-bottom:1px solid var(--line);background:var(--panel);align-items:stretch}
+.dB .bar>*{display:flex;align-items:center;padding:0 14px;border-right:1px solid var(--line)}
+.dB .bar>*:last-child{border-right:0}
+.dB .brand{font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+.dB .steps{padding:0}
+.dB .steps li{flex:1;display:flex;flex-direction:column;justify-content:center;padding:7px 12px;border-right:1px solid var(--line);border-top:2px solid transparent;color:var(--ink2);font-size:11.5px}
+.dB .steps li:last-child{border-right:0}
+.dB .steps li.on{flex:1.5;color:var(--ink);border-top-color:var(--live);background:#18212a}
+.dB .s-top{justify-content:space-between}
+.dB .s-sub{font-size:10.5px;color:var(--ink2);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
+.dB .s-sub b{color:var(--live);font-weight:500}
+.dB .timer{font-size:15px;font-weight:500}
+.dB .timer span{color:var(--ink2);font-weight:400;margin-left:6px}
+.dB .bar .btnwrap{padding:0 10px}
+.dB .btn{background:#1c252e;border:1px solid #556676;border-radius:0;font-size:12px;padding:6px 12px}
+.dB .btn.pri{background:var(--live);border-color:var(--live);color:#17110a;font-weight:600}
+.dB .about{font-size:12px;color:var(--ink2);text-underline-offset:3px}
+.dB .main{grid-template-columns:248px 1fr 290px;gap:10px;padding:10px;
+  grid-template-areas:"brief brief brief" "ctl bench bench" "ctl read read" "note table plot" "gap gap gap"}
+.dB .brief{border:1px solid var(--line);background:var(--panel);padding:8px 12px;align-items:center}
+.dB .brief p{font-family:var(--sans);font-size:13.5px;max-width:none}
+.dB .brief p strong{color:var(--live);font-weight:500}
+.dB .chip{border:1px solid var(--ghost);color:var(--ghost-lab);padding:3px 8px;font-size:12px}
+.dB section,.dB figure{border:1px solid var(--line);background:var(--panel)}
+.dB section{padding:0 12px 12px}
+.dB .lab{margin:0 -12px 10px;padding:5px 12px;border-bottom:1px solid var(--line);font-size:10.5px;font-weight:500;letter-spacing:.1em;color:var(--ink2);display:flex;justify-content:space-between}
+.dB .up{text-transform:uppercase}
+.dB .bench{background:var(--bench-bg)}
+.dB .bench .lab{margin:0;background:var(--panel)}
+.dB .bench .lab em{font-style:normal;color:var(--live)}
+.dB figcaption{display:none}
+.dB .ctl{margin-bottom:10px}
+.dB .ctl-l{font-size:12px;color:var(--ink2)}
+.dB .ctl-l i{color:var(--ink)}
+.dB .ctl-v{border:1px solid var(--line);background:var(--bench-bg);padding:1px 6px;font-size:12.5px}
+.dB .ctl-v em{color:var(--ink2)}
+.dB .ctl-r{color:#5d6e7e;font-size:10px}
+.dB .thumb{width:7px;height:16px;background:var(--ink)}
+.dB .locked .thumb{background:#5d6e7e}
+.dB .acts{margin-top:12px;flex-direction:column;gap:6px}
+.dB .acts .btn{padding:8px 12px}
+.dB .a-read{padding:0;border:0;background:none}
+.dB .read{gap:10px;height:100%}
+.dB .read div{flex:1;border:1px solid var(--line);background:var(--panel);padding:6px 12px 8px}
+.dB .read dt{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
+.dB .read dd{font-size:24px;font-weight:500;line-height:1.2}
+.dB .read dd span{color:var(--ink2)}
+.dB .read .live dd{color:var(--live)}
+.dB .table-h{margin:0 -12px 10px;padding:0 6px 0 0;border-bottom:1px solid var(--line)}
+.dB .table-h .lab{margin:0;border:0;flex:1}
+.dB .addcol{font-size:11px;color:var(--ink2)}
+.dB .sel{border:1px solid #556676;background:#1c252e;color:var(--ink);padding:1px 6px;font-size:11.5px}
+.dB th,.dB td{border:1px solid var(--line);padding:4px 10px}
+.dB th{font-size:11px;font-weight:500;color:var(--ink2);background:#18212a}
+.dB td{font-size:12.5px}
+.dB .cur td:first-child{box-shadow:inset 2px 0 0 var(--live)}
+.dB .cur .r{color:var(--live)}
+.dB .calc{color:var(--ghost-lab)}
+.dB th.calc{color:var(--ghost-lab)}
+.dB .note{border:1px solid #6b5220;background:#1a1408;color:#f0cf8b;padding:10px 12px;font-family:var(--sans);font-size:13px;align-self:start}
+.dB .gap{padding-bottom:14px}
+.dB .tag{color:var(--ink);text-transform:uppercase}
+.dB .gap-pre{text-transform:none;letter-spacing:0}
+.dB .gap-top{margin:0 -12px 12px;padding:5px 12px;border-bottom:1px solid var(--line);font-size:10.5px;letter-spacing:.1em;color:var(--ink2)}
+.dB .gap-nums{gap:0}
+.dB .gap-nums>div{border:1px solid var(--line);background:var(--bench-bg);padding:8px 16px 10px}
+.dB .gap-nums>div+div{border-left:0}
+.dB .gap-nums span{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
+.dB .gap-nums b{font-size:38px;font-weight:500}
+.dB .gap-nums .pred b{color:var(--ghost-lab)}
+.dB .gap-nums .meas b{color:var(--live)}
+.dB .gap-rows{color:var(--ink2)}
+.dB .gap-rows b{color:var(--ink);font-weight:500}
+.dB .gap-q{font-family:var(--sans);font-size:15px;line-height:1.5;color:var(--ink)}
+.dB .foot{padding:6px 12px;border-top:1px solid var(--line);font-size:10.5px;color:#5d6e7e;letter-spacing:.06em}
+
+/* =====================================================================
+   C · Print textbook
+   ===================================================================== */
+.dC{
+  --ink:#111;--ink2:#555;--rule:#c9c9c9;--live:#0a6b6b;--ghost:#6b6b6b;--num:var(--mono);
+  --axis:#111;--lab:#222;--bench-bg:#fff;--ghost-lab:#444;--live-lab:#0a6b6b;--launch-fill:#fff;
+  --ghost-dash:5 3;--sw-live:1.7;--sw-ghost:.8;--fs:11px;--fs2:10.5px;
+  --trk-h:1px;--fill-h:3px;--trk:#111;--trk-fill:#0a6b6b;
+  background:#fff;color:var(--ink);border:1px solid #111;
+  font:14px/1.5 var(--sans);
+}
+.dC .bar{padding:18px 48px 14px;gap:28px;align-items:flex-start}
+.dC .brand{font-weight:600;font-size:16px;letter-spacing:-.005em}
+.dC .steps{gap:28px}
+.dC .steps li{font-size:13px;color:var(--ink2);padding-bottom:3px}
+.dC .steps li.on{color:var(--ink);font-weight:500;border-bottom:2px solid var(--live)}
+.dC .s-t{font-size:12px}
+.dC .s-sub{font-size:11.5px;color:var(--ink2);font-weight:400;margin-top:1px}
+.dC .s-sub b{color:var(--live);font-weight:600}
+.dC .timer{font-size:14px;font-weight:500}
+.dC .timer span{color:var(--ink2);font-weight:400}
+.dC .btn{background:#fff;border:1px solid #111;border-radius:2px;font-size:13px;padding:5px 12px}
+.dC .bar .btn{margin-top:-4px}
+.dC .btn.pri{background:var(--live);border-color:var(--live);color:#fff;font-weight:600}
+.dC .about{font-size:13px;text-underline-offset:3px}
+.dC .main{grid-template-columns:1fr 300px;gap:24px 48px;padding:16px 48px 36px;
+  grid-template-areas:"brief brief" "bench ctl" "read ctl" "table plot" "note plot" "gap gap"}
+.dC .brief{border-top:1px solid #111;padding-top:14px}
+.dC .brief p{font-size:15.5px;max-width:68ch}
+.dC .brief p strong{font-weight:600}
+.dC .chip{font-size:13px;border-bottom:1px solid var(--live);padding-bottom:2px;color:var(--ink)}
+.dC .chip b{color:var(--live)}
+.dC figcaption{font-size:12.5px;color:var(--ink2);margin-top:8px;max-width:64ch}
+.dC figcaption b{color:var(--ink);font-weight:600}
+.dC .lab{font-size:12.5px;font-weight:600;padding-bottom:5px;margin-bottom:12px;border-bottom:1px solid #111}
+.dC .ctl{margin-bottom:12px}
+.dC .ctl-l{font-size:13.5px}
+.dC .ctl-v{font-size:13px;font-weight:500}
+.dC .ctl-v em{color:var(--ink2);font-weight:400}
+.dC .ctl-r{color:var(--ink2)}
+.dC .thumb{width:11px;height:11px;border-radius:50%;background:var(--live)}
+.dC .locked{--trk-fill:#999}
+.dC .locked .thumb{background:#999}
+.dC .locked .ctl-l,.dC .locked .ctl-v{color:var(--ink2)}
+.dC .acts{margin-top:18px}
+.dC .acts .btn{padding:8px 12px}
+.dC .read{gap:40px}
+.dC .read dt{color:var(--ink2);font-size:12px}
+.dC .read dd{font-size:24px;font-weight:400;letter-spacing:-.02em}
+.dC .read dd span{color:var(--ink2)}
+.dC .read .live dd{color:var(--live)}
+.dC .table-h{padding-bottom:5px;margin-bottom:0;border-bottom:1.5px solid #111}
+.dC .table-h .lab{margin:0;padding:0;border:0}
+.dC .sel{border:1px solid #111;border-radius:2px;font-family:var(--mono);font-size:12px}
+.dC th{font-size:12px;font-weight:500;color:var(--ink2);padding:7px 12px 6px;border-bottom:1px solid #111}
+.dC td{font-size:13.5px;padding:6px 12px}
+.dC tbody tr:last-child td{border-bottom:1.5px solid #111;padding-bottom:8px}
+.dC .cur .r{color:var(--live);font-weight:600}
+.dC .cur td:first-child{box-shadow:inset 2px 0 0 var(--live)}
+.dC th.calc,.dC td.calc{font-style:italic}
+.dC .note{border-left:2px solid #c58a00;padding:2px 0 2px 14px;color:#6e4a00;font-size:14px;max-width:60ch;align-self:start}
+.dC .gap{border-top:1.5px solid #111;padding-top:12px;margin-top:8px}
+.dC .tag{font-size:12.5px;font-weight:600;text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--live)}
+.dC .gap-pre{font-size:12px;color:var(--ink2)}
+.dC .gap-body{margin-top:16px;gap:56px}
+.dC .gap-nums{gap:48px}
+.dC .gap-nums span{color:var(--ink2)}
+.dC .gap-nums b{font-size:42px;font-weight:400;letter-spacing:-.03em}
+.dC .gap-nums .meas b{color:var(--live)}
+.dC .gap-rows{font-size:13.5px;color:var(--ink2)}
+.dC .gap-rows b{color:var(--ink);font-weight:500}
+.dC .gap-q{font-size:17px;line-height:1.5}
+.dC .foot{margin:0 48px;padding:10px 0 14px;border-top:1px solid var(--rule);font-size:11px;color:var(--ink2)}
+</style>
+</head>
+<body>
+
+<!-- shared figure geometry: 4 px per metre on both axes, origin at (40,110) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="bench" viewBox="0 0 720 150">
+      <path class="g-grid" d="M40 10H680M40 50H680M40 90H680M60 10v100M80 10v100M100 10v100M140 10v100M160 10v100M180 10v100M220 10v100M240 10v100M260 10v100M300 10v100M320 10v100M340 10v100M380 10v100M400 10v100M420 10v100M460 10v100M480 10v100M500 10v100M540 10v100M560 10v100M580 10v100M620 10v100M640 10v100M660 10v100"/>
+      <path class="g-grid2" d="M40 30H680M40 70H680M120 10v100M200 10v100M280 10v100M360 10v100M440 10v100M520 10v100M600 10v100M680 10v100"/>
+      <!-- axes and scale -->
+      <path class="g-tick" d="M40 110V10M36 70h4M36 30h4"/>
+      <path class="g-ground" d="M22 110H702"/>
+      <path class="g-tick" d="M40 110v6M120 110v6M200 110v6M280 110v6M360 110v6M440 110v6M520 110v6M600 110v6M680 110v6M80 110v3M160 110v3M240 110v3M320 110v3M400 110v3M480 110v3M560 110v3M640 110v3"/>
+      <g class="g-lab" text-anchor="middle">
+        <text x="40" y="128">0</text><text x="120" y="128">20</text><text x="200" y="128">40</text>
+        <text x="280" y="128">60</text><text x="360" y="128">80</text><text x="440" y="128">100</text>
+        <text x="520" y="128">120</text><text x="600" y="128">140</text><text x="680" y="128">160</text>
+      </g>
+      <g class="g-lab" text-anchor="end">
+        <text x="33" y="73.5">10</text><text x="33" y="33.5">20</text><text x="33" y="15">m</text>
+        <text x="680" y="145">distance from launcher (m)</text>
+      </g>
+      <!-- ghost trails -->
+      <path class="g-ghost" d="M40 110Q110.6 69.2 181.2 110"/>
+      <path class="g-ghost" d="M40 110Q198.8 18.2 357.6 110"/>
+      <circle class="g-ghm" cx="181.2" cy="110" r="2.6"/>
+      <circle class="g-ghm" cx="357.6" cy="110" r="2.6"/>
+      <text class="g-ghl" x="187" y="103">#1</text>
+      <text class="g-ghl" x="363" y="103">#2</text>
+      <!-- live shot -->
+      <path class="g-peak" d="M322.4 28.4V110"/>
+      <path class="g-glow" d="M40 110Q322.4 -53.3 604.8 110"/>
+      <path class="g-live" d="M40 110Q322.4 -53.3 604.8 110"/>
+      <text class="g-lab" x="322.4" y="21" text-anchor="middle">H 20.4 m</text>
+      <circle class="g-ball" cx="604.8" cy="105.5" r="4.5"/>
+      <text class="g-livel" x="614" y="100">141.2 m</text>
+      <!-- launcher, aim arrow, angle arc -->
+      <path class="g-arc" d="M70 110A30 30 0 0 0 66 95"/>
+      <text class="g-lab" x="74" y="106">30°</text>
+      <path class="g-aim" d="M40 110L80 86.9"/>
+      <path class="g-aimh" d="M85 84L80.2 89.8L77.6 85.2z"/>
+      <rect class="g-launch" x="34" y="106.5" width="22" height="7" transform="rotate(-30 40 110)"/>
+      <circle class="g-aimh" cx="40" cy="110" r="2.2"/>
+    </symbol>
+
+    <symbol id="scatter" viewBox="0 0 240 180">
+      <path class="g-grid2" d="M36 110H230M36 80H230M36 50H230M36 20H230"/>
+      <path class="g-ground" d="M36 14V140H232"/>
+      <path class="g-tick" d="M74 140v4M112 140v4M150 140v4M188 140v4M226 140v4M32 110h4M32 80h4M32 50h4M32 20h4"/>
+      <g class="g-lab2" text-anchor="middle">
+        <text x="36" y="156">0</text><text x="74" y="156">10</text><text x="112" y="156">20</text>
+        <text x="150" y="156">30</text><text x="188" y="156">40</text><text x="226" y="156">50</text>
+      </g>
+      <g class="g-lab2" text-anchor="end">
+        <text x="29" y="143.5">0</text><text x="29" y="113.5">40</text><text x="29" y="83.5">80</text>
+        <text x="29" y="53.5">120</text><text x="29" y="23.5">160</text>
+        <text x="230" y="174">u (m/s)</text>
+      </g>
+      <text class="g-lab2" x="42" y="12">R (m)</text>
+      <circle class="g-pt" cx="112" cy="113.5" r="3.5"/>
+      <circle class="g-pt" cx="150" cy="80.4" r="3.5"/>
+      <circle class="g-ptl" cx="188" cy="34.1" r="4"/>
+      <g class="g-lab2">
+        <text x="119" y="117">#1</text><text x="157" y="84">#2</text><text x="195" y="38">#3</text>
+      </g>
+    </symbol>
+
+    <symbol id="lock" viewBox="0 0 12 12">
+      <rect x="2" y="5.5" width="8" height="5.5" rx="1" fill="currentColor"/>
+      <path d="M4 5.5V3.8a2 2 0 0 1 4 0V5.5" fill="none" stroke="currentColor" stroke-width="1.3"/>
+    </symbol>
+    <symbol id="caret" viewBox="0 0 10 10">
+      <path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="page">
+  <header class="page-h">
+    <h1>Range Lab · design directions</h1>
+    <p>Same Lab bench screen, three treatments. Pick A, B or C.</p>
+  </header>
+
+  <!-- ============================== A ============================== -->
+  <div class="dir-h"><h2>Direction A</h2><p>Lab notebook: warm paper, graph-paper bench, ink line drawings, one vermilion live shot.</p></div>
+  <div class="frame dA">
+    <header class="bar">
+      <div class="brand">Range Lab</div>
+      <ol class="steps">
+        <li class="on"><div class="s-top"><span>Mission 1 · Speed</span><span class="s-t">4:00</span></div><div class="s-sub"><i>Predict</i><b>Experiment</b><i>Explain</i></div></li>
+        <li><div class="s-top"><span>Mission 2 · Angle</span><span class="s-t">3:30</span></div></li>
+        <li><div class="s-top"><span>Challenge</span><span class="s-t">2:00</span></div></li>
+        <li><div class="s-top"><span>Debrief</span><span class="s-t">0:30</span></div></li>
+      </ol>
+      <div class="timer">2:14 <span>/ 10:00</span></div>
+      <button class="btn" type="button">Pause &amp; leave</button>
+      <a class="about" href="#">About</a>
+    </header>
+    <div class="main">
+      <div class="a-brief brief">
+        <p><strong>Test your prediction.</strong> Change one thing: speed. Hold the angle at 30°. Record at least 3 different speeds, and make one of them 40 m/s.</p>
+        <div class="chip">Your prediction: <b>70.6 m</b> · locked in</div>
+      </div>
+      <figure class="a-bench bench">
+        <svg viewBox="0 0 720 150" role="img" aria-label="Bench: three trajectories from the launcher at 30 degrees, landing at 35.3 m, 79.4 m and 141.2 m"><use href="#bench"/></svg>
+        <figcaption>Bench, drawn to scale. One small square = 5 m. Grey: trials #1 and #2. Red: current shot.</figcaption>
+      </figure>
+      <section class="a-ctl">
+        <h3 class="lab">Controls</h3>
+        <div class="ctl"><div class="ctl-h"><span class="ctl-l">Speed <i>u</i></span><span class="ctl-v">40 m/s</span></div><div class="track"><div class="fill" style="width:60%"></div><div class="thumb" style="left:60%"></div></div><div class="ctl-r"><span>10</span><span>60</span></div></div>
+        <div class="ctl"><div class="ctl-h"><span class="ctl-l">Angle <i>θ</i></span><span class="ctl-v">30°</span></div><div class="track"><div class="fill" style="width:33.3%"></div><div class="thumb" style="left:33.3%"></div></div><div class="ctl-r"><span>0</span><span>90</span></div></div>
+        <div class="ctl locked"><div class="ctl-h"><span class="ctl-l">Height <i>h</i></span><span class="ctl-v"><svg class="lock" viewBox="0 0 12 12" width="11" height="11"><use href="#lock"/></svg>0 m <em>(locked)</em></span></div><div class="track"><div class="fill" style="width:0"></div><div class="thumb" style="left:6px"></div></div><div class="ctl-r"><span>0</span><span>50</span></div></div>
+        <div class="acts"><button class="btn pri" type="button">Launch</button><button class="btn" type="button">Record trial</button></div>
+      </section>
+      <section class="a-read">
+        <dl class="read">
+          <div class="live"><dt>Range</dt><dd>141.2 <span>m</span></dd></div>
+          <div><dt>Time of flight</dt><dd>4.08 <span>s</span></dd></div>
+          <div><dt>Max height</dt><dd>20.4 <span>m</span></dd></div>
+        </dl>
+      </section>
+      <section class="a-table">
+        <div class="table-h"><h3 class="lab">Trials</h3><div class="addcol"><span>Add a column:</span><span class="sel">R ÷ u <svg viewBox="0 0 10 10" width="9" height="9"><use href="#caret"/></svg></span></div></div>
+        <table>
+          <thead><tr><th>#</th><th>u (m/s)</th><th>θ (°)</th><th>h (m)</th><th>R (m)</th><th>T (s)</th><th class="calc">R ÷ u</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>20</td><td>30</td><td>0</td><td class="r">35.3</td><td>2.04</td><td class="calc">1.77</td></tr>
+            <tr><td>2</td><td>30</td><td>30</td><td>0</td><td class="r">79.4</td><td>3.06</td><td class="calc">2.65</td></tr>
+            <tr class="cur"><td>3</td><td>40</td><td>30</td><td>0</td><td class="r">141.2</td><td>4.08</td><td class="calc">3.53</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="a-plot">
+        <h3 class="lab">R vs u (your trials)</h3>
+        <svg viewBox="0 0 240 180" role="img" aria-label="Scatter of range against speed for three trials"><use href="#scatter"/></svg>
+      </section>
+      <p class="a-note note">Two points fit a line and a curve equally well. You now have three: look at the shape.</p>
+      <section class="a-gap gap">
+        <div class="gap-top"><span class="tag">Prediction refuted</span><span class="gap-pre">Next screen, shown here for styling</span></div>
+        <div class="gap-body">
+          <div>
+            <div class="gap-nums"><div class="pred"><span>You predicted</span><b>70.6 m</b></div><div class="meas"><span>You measured</span><b>141.2 m</b></div></div>
+            <p class="gap-rows">Your rows: <b>u × 2.0 → R × 4.0</b></p>
+          </div>
+          <p class="gap-q">Your model says range follows speed. Range is horizontal speed × time in the air. Which of those did you assume stays the same when u doubles?</p>
+        </div>
+      </section>
+    </div>
+    <footer class="foot">ET617 · 23B0702 · P5-T10-L6-C4</footer>
+  </div>
+
+  <!-- ============================== B ============================== -->
+  <div class="dir-h"><h2>Direction B</h2><p>Instrument panel: dark scope bench, luminous traces, mono readouts in hairline cells, dense.</p></div>
+  <div class="frame dB">
+    <header class="bar">
+      <div class="brand">Range Lab</div>
+      <ol class="steps">
+        <li class="on"><div class="s-top"><span>Mission 1 · Speed</span><span class="s-t">4:00</span></div><div class="s-sub"><i>Predict</i><b>Experiment</b><i>Explain</i></div></li>
+        <li><div class="s-top"><span>Mission 2 · Angle</span><span class="s-t">3:30</span></div></li>
+        <li><div class="s-top"><span>Challenge</span><span class="s-t">2:00</span></div></li>
+        <li><div class="s-top"><span>Debrief</span><span class="s-t">0:30</span></div></li>
+      </ol>
+      <div class="timer">2:14 <span>/ 10:00</span></div>
+      <div class="btnwrap"><button class="btn" type="button">Pause &amp; leave</button></div>
+      <a class="about" href="#">About</a>
+    </header>
+    <div class="main">
+      <div class="a-brief brief">
+        <p><strong>Test your prediction.</strong> Change one thing: speed. Hold the angle at 30°. Record at least 3 different speeds, and make one of them 40 m/s.</p>
+        <div class="chip">Your prediction: <b>70.6 m</b> · locked in</div>
+      </div>
+      <section class="a-ctl">
+        <h3 class="lab up">Controls</h3>
+        <div class="ctl"><div class="ctl-h"><span class="ctl-l">Speed <i>u</i></span><span class="ctl-v">40 m/s</span></div><div class="track"><div class="fill" style="width:60%"></div><div class="thumb" style="left:60%"></div></div><div class="ctl-r"><span>10</span><span>60</span></div></div>
+        <div class="ctl"><div class="ctl-h"><span class="ctl-l">Angle <i>θ</i></span><span class="ctl-v">30°</span></div><div class="track"><div class="fill" style="width:33.3%"></div><div class="thumb" style="left:33.3%"></div></div><div class="ctl-r"><span>0</span><span>90</span></div></div>
+        <div class="ctl locked"><div class="ctl-h"><span class="ctl-l">Height <i>h</i></span><span class="ctl-v"><svg class="lock" viewBox="0 0 12 12" width="11" height="11"><use href="#lock"/></svg>0 m <em>(locked)</em></span></div><div class="track"><div class="fill" style="width:0"></div><div class="thumb" style="left:3px"></div></div><div class="ctl-r"><span>0</span><span>50</span></div></div>
+        <div class="acts"><button class="btn pri" type="button">Launch</button><button class="btn" type="button">Record trial</button></div>
+      </section>
+      <figure class="a-bench bench">
+        <div class="lab up"><span>Bench · 5 m / div</span><span>θ 30° · h 0 m · <em>shot 3 live</em></span></div>
+        <svg viewBox="0 0 720 150" role="img" aria-label="Bench: three trajectories from the launcher at 30 degrees, landing at 35.3 m, 79.4 m and 141.2 m"><use href="#bench"/></svg>
+      </figure>
+      <section class="a-read">
+        <dl class="read">
+          <div class="live"><dt>Range</dt><dd>141.2 <span>m</span></dd></div>
+          <div><dt>Time of flight</dt><dd>4.08 <span>s</span></dd></div>
+          <div><dt>Max height</dt><dd>20.4 <span>m</span></dd></div>
+        </dl>
+      </section>
+      <p class="a-note note">Two points fit a line and a curve equally well. You now have three: look at the shape.</p>
+      <section class="a-table">
+        <div class="table-h"><h3 class="lab up">Trials</h3><div class="addcol"><span>Add a column:</span><span class="sel">R ÷ u <svg viewBox="0 0 10 10" width="9" height="9"><use href="#caret"/></svg></span></div></div>
+        <table>
+          <thead><tr><th>#</th><th>u (m/s)</th><th>θ (°)</th><th>h (m)</th><th>R (m)</th><th>T (s)</th><th class="calc">R ÷ u</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>20</td><td>30</td><td>0</td><td class="r">35.3</td><td>2.04</td><td class="calc">1.77</td></tr>
+            <tr><td>2</td><td>30</td><td>30</td><td>0</td><td class="r">79.4</td><td>3.06</td><td class="calc">2.65</td></tr>
+            <tr class="cur"><td>3</td><td>40</td><td>30</td><td>0</td><td class="r">141.2</td><td>4.08</td><td class="calc">3.53</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="a-plot">
+        <h3 class="lab">R vs u (your trials)</h3>
+        <svg viewBox="0 0 240 180" role="img" aria-label="Scatter of range against speed for three trials"><use href="#scatter"/></svg>
+      </section>
+      <section class="a-gap gap">
+        <div class="gap-top"><span class="tag">Prediction refuted</span><span class="gap-pre">Next screen, shown here for styling</span></div>
+        <div class="gap-body">
+          <div>
+            <div class="gap-nums"><div class="pred"><span>You predicted</span><b>70.6 m</b></div><div class="meas"><span>You measured</span><b>141.2 m</b></div></div>
+            <p class="gap-rows">Your rows: <b>u × 2.0 → R × 4.0</b></p>
+          </div>
+          <p class="gap-q">Your model says range follows speed. Range is horizontal speed × time in the air. Which of those did you assume stays the same when u doubles?</p>
+        </div>
+      </section>
+    </div>
+    <footer class="foot">ET617 · 23B0702 · P5-T10-L6-C4</footer>
+  </div>
+
+  <!-- ============================== C ============================== -->
+  <div class="dir-h"><h2>Direction C</h2><p>Print textbook: white page, black hairline figures with captions, one teal accent, open spacing.</p></div>
+  <div class="frame dC">
+    <header class="bar">
+      <div class="brand">Range Lab</div>
+      <ol class="steps">
+        <li class="on"><div class="s-top"><span>Mission 1 · Speed</span><span class="s-t">4:00</span></div><div class="s-sub"><i>Predict</i><b>Experiment</b><i>Explain</i></div></li>
+        <li><div class="s-top"><span>Mission 2 · Angle</span><span class="s-t">3:30</span></div></li>
+        <li><div class="s-top"><span>Challenge</span><span class="s-t">2:00</span></div></li>
+        <li><div class="s-top"><span>Debrief</span><span class="s-t">0:30</span></div></li>
+      </ol>
+      <div class="timer">2:14 <span>/ 10:00</span></div>
+      <button class="btn" type="button">Pause &amp; leave</button>
+      <a class="about" href="#">About</a>
+    </header>
+    <div class="main">
+      <div class="a-brief brief">
+        <p><strong>Test your prediction.</strong> Change one thing: speed. Hold the angle at 30°. Record at least 3 different speeds, and make one of them 40 m/s.</p>
+        <div class="chip">Your prediction: <b>70.6 m</b> · locked in</div>
+      </div>
+      <figure class="a-bench bench">
+        <svg viewBox="0 0 720 150" role="img" aria-label="Bench: three trajectories from the launcher at 30 degrees, landing at 35.3 m, 79.4 m and 141.2 m"><use href="#bench"/></svg>
+        <figcaption><b>Fig. 1</b>&ensp;Launches at θ = 30°, h = 0 m, drawn to scale. Dashed: trials #1 and #2. Solid: current shot, u = 40 m/s.</figcaption>
+      </figure>
+      <section class="a-ctl">
+        <h3 class="lab">Controls</h3>
+        <div class="ctl"><div class="ctl-h"><span class="ctl-l">Speed <i>u</i></span><span class="ctl-v">40 m/s</span></div><div class="track"><div class="fill" style="width:60%"></div><div class="thumb" style="left:60%"></div></div><div class="ctl-r"><span>10</span><span>60</span></div></div>
+        <div class="ctl"><div class="ctl-h"><span class="ctl-l">Angle <i>θ</i></span><span class="ctl-v">30°</span></div><div class="track"><div class="fill" style="width:33.3%"></div><div class="thumb" style="left:33.3%"></div></div><div class="ctl-r"><span>0</span><span>90</span></div></div>
+        <div class="ctl locked"><div class="ctl-h"><span class="ctl-l">Height <i>h</i></span><span class="ctl-v"><svg class="lock" viewBox="0 0 12 12" width="11" height="11"><use href="#lock"/></svg>0 m <em>(locked)</em></span></div><div class="track"><div class="fill" style="width:0"></div><div class="thumb" style="left:5px"></div></div><div class="ctl-r"><span>0</span><span>50</span></div></div>
+        <div class="acts"><button class="btn pri" type="button">Launch</button><button class="btn" type="button">Record trial</button></div>
+      </section>
+      <section class="a-read">
+        <dl class="read">
+          <div class="live"><dt>Range</dt><dd>141.2 <span>m</span></dd></div>
+          <div><dt>Time of flight</dt><dd>4.08 <span>s</span></dd></div>
+          <div><dt>Max height</dt><dd>20.4 <span>m</span></dd></div>
+        </dl>
+      </section>
+      <section class="a-table">
+        <div class="table-h"><h3 class="lab">Table 1&ensp;Trials</h3><div class="addcol"><span>Add a column:</span><span class="sel">R ÷ u <svg viewBox="0 0 10 10" width="9" height="9"><use href="#caret"/></svg></span></div></div>
+        <table>
+          <thead><tr><th>#</th><th>u (m/s)</th><th>θ (°)</th><th>h (m)</th><th>R (m)</th><th>T (s)</th><th class="calc">R ÷ u</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>20</td><td>30</td><td>0</td><td class="r">35.3</td><td>2.04</td><td class="calc">1.77</td></tr>
+            <tr><td>2</td><td>30</td><td>30</td><td>0</td><td class="r">79.4</td><td>3.06</td><td class="calc">2.65</td></tr>
+            <tr class="cur"><td>3</td><td>40</td><td>30</td><td>0</td><td class="r">141.2</td><td>4.08</td><td class="calc">3.53</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="a-plot">
+        <h3 class="lab">Fig. 2&ensp;R vs u (your trials)</h3>
+        <svg viewBox="0 0 240 180" role="img" aria-label="Scatter of range against speed for three trials"><use href="#scatter"/></svg>
+      </section>
+      <p class="a-note note">Two points fit a line and a curve equally well. You now have three: look at the shape.</p>
+      <section class="a-gap gap">
+        <div class="gap-top"><span class="tag">Prediction refuted</span><span class="gap-pre">Next screen, shown here for styling</span></div>
+        <div class="gap-body">
+          <div>
+            <div class="gap-nums"><div class="pred"><span>You predicted</span><b>70.6 m</b></div><div class="meas"><span>You measured</span><b>141.2 m</b></div></div>
+            <p class="gap-rows">Your rows: <b>u × 2.0 → R × 4.0</b></p>
+          </div>
+          <p class="gap-q">Your model says range follows speed. Range is horizontal speed × time in the air. Which of those did you assume stays the same when u doubles?</p>
+        </div>
+      </section>
+    </div>
+    <footer class="foot">ET617 · 23B0702 · P5-T10-L6-C4</footer>
+  </div>
+</div>
+</body>
+</html>

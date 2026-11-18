@@ -3,9 +3,10 @@
 // ONE Socratic question. The model never calculates: every number comes from src/physics.ts.
 // Its output is checked in code (checkReply) before anything reaches the learner.
 
-import Anthropic from '@anthropic-ai/sdk'
-
-const MODEL = process.env.COACH_MODEL || 'claude-opus-5-5'
+// Model: hyde/glm-5.3-flash through the Hyde inference gateway (OpenAI-compatible chat completions).
+const API_URL = 'https://inference.hyde.tech/v1/chat/completions'
+const MODEL = process.env.COACH_MODEL || 'hyde/glm-5.3-flash'
+const TIMEOUT_MS = 5500
 
 // ===================== THE PROMPT (pasted in the report, section D6) =====================
 export const COACH_SYSTEM_PROMPT = `You are a Socratic physics olympiad mentor inside a projectile-motion virtual lab.
@@ -77,11 +78,37 @@ interface Res {
   json: (body: unknown) => void
 }
 
+/** One model call. Throws on timeout, network error or a non-200 status. */
+async function callModel(input: unknown, signal: AbortSignal): Promise<string> {
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    signal,
+    headers: { Authorization: `Bearer ${process.env.HYDE_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 700,
+      reasoning_effort: 'low', // short answers, fast: the question must arrive inside 6 seconds
+      messages: [
+        { role: 'system', content: COACH_SYSTEM_PROMPT },
+        { role: 'user', content: JSON.stringify(input) },
+      ],
+    }),
+  })
+  if (!response.ok) throw new Error(`api_error_${response.status}`)
+  const data = (await response.json()) as { choices?: { message?: { content?: string } }[] }
+  return data.choices?.[0]?.message?.content ?? ''
+}
+
 export default async function handler(req: Req, res: Res) {
   if (req.method !== 'POST') return res.status(405).json({ ok: false, reason: 'method_not_allowed' })
-  if (!process.env.ANTHROPIC_API_KEY) return res.status(200).json({ ok: false, reason: 'no_api_key' })
+  if (!process.env.HYDE_API_KEY) return res.status(200).json({ ok: false, reason: 'no_api_key' })
 
-  const body = (typeof req.body === 'string' ? JSON.parse(req.body) : req.body) as Record<string, unknown> | undefined
+  let body: Record<string, unknown> | undefined
+  try {
+    body = (typeof req.body === 'string' ? JSON.parse(req.body) : req.body) as Record<string, unknown> | undefined
+  } catch {
+    body = undefined
+  }
   if (!body || (body.mission !== 'm1' && body.mission !== 'm2')) return res.status(400).json({ ok: false, reason: 'bad_request' })
 
   // Only the fields the coach needs, with free text capped.
@@ -97,25 +124,26 @@ export default async function handler(req: Req, res: Res) {
   }
 
   const started = Date.now()
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
   try {
-    const client = new Anthropic({ timeout: 5500, maxRetries: 0 })
-    const message = await client.messages.create({
-      model: MODEL,
-      max_tokens: 2000,
-      system: COACH_SYSTEM_PROMPT,
-      output_config: { effort: 'low' },
-      messages: [{ role: 'user', content: JSON.stringify(input) }],
-    })
+    let raw: string
+    try {
+      raw = await callModel(input, controller.signal)
+    } catch (first) {
+      // The gateway sometimes fails a single request. Retry once if there is still time.
+      if (controller.signal.aborted || Date.now() - started > 2500) throw first
+      raw = await callModel(input, controller.signal)
+    }
     const ms = Date.now() - started
-    if (message.stop_reason === 'refusal') return res.status(200).json({ ok: false, reason: 'refusal', ms })
-
-    const raw = message.content.map((block) => (block.type === 'text' ? block.text : '')).join('')
     const checked = checkReply(raw, input.mission as string)
     if (!checked.ok) return res.status(200).json({ ok: false, reason: checked.reason, ms })
     return res.status(200).json({ ok: true, ...checked.reply, model: MODEL, ms })
   } catch (error) {
     const ms = Date.now() - started
-    const reason = error instanceof Anthropic.APIConnectionTimeoutError ? 'timeout' : error instanceof Anthropic.APIError ? `api_error_${error.status ?? 'network'}` : 'error'
+    const reason = controller.signal.aborted ? 'timeout' : error instanceof Error && error.message.startsWith('api_error') ? error.message : 'network'
     return res.status(200).json({ ok: false, reason, ms })
+  } finally {
+    clearTimeout(timer)
   }
 }

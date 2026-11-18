@@ -89,7 +89,7 @@ A refuted prediction or a confounded set of trials is the unsuccessful experimen
 
 ## 6. AI feature: inquiry coach
 
-- On Interpret, the app posts the learner's hypothesis, prediction, trials table and explanation to `/api/coach` (one Vercel serverless function, Anthropic API, key in an environment variable).
+- On Interpret, the app posts the learner's hypothesis, prediction, trials table and explanation to `/api/coach` (one Vercel serverless function calling `hyde/glm-5.3-flash` through the Hyde inference gateway, key in an environment variable).
 - The model classifies the explanation and asks **one** Socratic question. It never calculates: all numbers come from `physics.ts`.
 - Output is checked in code before the learner sees it: valid JSON, allowed verdict, length limit, and a leak filter that rejects anything stating the relationship, a formula or the best angle. The rule-based verdict wins if the AI disagrees.
 - If the call fails, times out or fails a check, the written rule-based feedback is shown with the label "offline coach (recorded feedback)". The app works fully with AI turned off.
