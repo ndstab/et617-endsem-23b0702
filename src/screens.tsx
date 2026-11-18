@@ -351,7 +351,7 @@ function Hints({ s, dispatch, mission }: P & { mission: MissionId }) {
         </button>
       </div>
       {level > 0 && (
-        <ol className="mt-2 space-y-1.5 pl-5 text-[16px]">
+        <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-[16px]">
           {hints.slice(0, level).map((h, i) => (
             <li key={i}>{h}</li>
           ))}
@@ -801,10 +801,10 @@ export function Debrief({ s, dispatch }: P) {
               xMax={22}
               yMax={16}
               shots={[
-                { u: 10, angle: 45, cls: 'fig-dash', label: '17.3' },
+                { u: 10, angle: 45, cls: 'fig-dash' },
                 { u: 10, angle: 29, cls: 'fig-accent draw', label: '18.7 m' },
               ]}
-              caption="Fig. 4 · From 12 m at 10 m/s: 29° (solid) out-throws 45° (dashed). The flatter shot spends the fall moving forward faster."
+              caption="Fig. 4 · From 12 m at 10 m/s: 29° (solid, 18.7 m) out-throws 45° (dashed, 17.3 m). The flatter shot spends the fall moving forward faster."
             />
           </div>
         </section>
@@ -852,74 +852,184 @@ export function Debrief({ s, dispatch }: P) {
 
 // ---------------------------------------------------------------- About
 
+const CARD = [
+  { code: 'P5', name: 'Problem', text: 'Inquiry-based virtual laboratory' },
+  { code: 'T10', name: 'Topic', text: 'Projectile motion: angle and speed vs range (Cl. 11)' },
+  { code: 'L6', name: 'Learner', text: 'High-achieving Olympiad aspirant, bored by routine practice' },
+  { code: 'C4', name: 'Constraint', text: '10-minute sessions: one sequence in 10 minutes, stop and resume' },
+]
+
+const LOOP = [
+  { n: '1', title: 'Predict', text: 'Commit a number, a hypothesis and how sure you are. No verdict yet.' },
+  { n: '2', title: 'Experiment', text: 'Change one variable on the bench. The app comments on your method, not your answer.' },
+  { n: '3', title: 'Explain', text: 'Your prediction meets your own data. One question comes back. The explanation only after you commit.' },
+]
+
+const PIPELINE = [
+  { title: 'Your conclusion', text: 'relationship + explanation + your trials' },
+  { title: 'Rules decide', text: 'the verdict comes from code, never from the AI' },
+  { title: 'AI writes one question', text: 'hyde/glm-5.3-flash, 6 s limit' },
+  { title: 'Checks', text: 'format · length · leak filter' },
+  { title: 'You see it', text: 'labelled "AI coach"' },
+]
+
 export function About({ s, dispatch }: P) {
+  const midSession = s.step !== 'home' && s.step !== 'debrief'
+  const trials = s.m1.trials.length + s.m2.trials.length + s.ch.trials.length
+  const count = (type: string) => s.log.filter((e) => e.type === type).length
   return (
     <div>
-      <Heading kicker="About" title="About this lab" />
-      <div className="grid gap-5 lg:grid-cols-2">
-        <section className="sheet">
-          <p className="label">Identity</p>
-          <p className="num mt-1 text-lg font-semibold">{IDENTITY}</p>
-          <table className="mt-3 w-full border-collapse text-sm">
-            <tbody>
-              {[
-                ['Roll no.', '23B0702'],
-                ['P5', 'Inquiry-based virtual laboratory'],
-                ['T10', 'Projectile motion: angle and speed vs range (Cl. 11)'],
-                ['L6', 'High-achieving learner preparing for an Olympiad, bored by routine practice'],
-                ['C4', '10-minute sessions: one sequence in 10 minutes, stop and resume'],
-              ].map(([k, v]) => (
-                <tr key={k} className="border-b border-rule last:border-0">
-                  <th className="num w-20 py-1.5 pr-3 text-left align-top font-semibold">{k}</th>
-                  <td className="py-1.5">{v}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* identity card */}
+      <section className="idcard rise">
+        <div className="idcard-head">
+          <div>
+            <p className="label">Exam identity card · ET 617 End-Sem 2026</p>
+            <p className="num mt-1 text-[30px] font-semibold leading-tight tracking-tight">{IDENTITY}</p>
+          </div>
+          <div className="text-right">
+            <p className="label">Roll no.</p>
+            <p className="num mt-1 text-[30px] font-semibold leading-tight text-accent-dark">23B0702</p>
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4">
+          {CARD.map((c, i) => (
+            <div key={c.code} className="idcard-cell plan-row" style={{ animationDelay: `${0.15 + i * 0.08}s` }}>
+              <p className="num text-[34px] font-semibold leading-none text-accent-dark">{c.code}</p>
+              <p className="label mt-2">{c.name}</p>
+              <p className="mt-0.5 text-[15px] leading-snug">{c.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
-          <p className="label mt-5">Learning outcomes</p>
-          <ol className="mt-1 space-y-1 pl-5 text-sm">
-            {OUTCOMES.map((o) => (
-              <li key={o}>{o}</li>
+      <div className="mt-7 space-y-7">
+        {/* how the lab works */}
+        <section className="sheet rise r2">
+          <p className="label">How one mission runs</p>
+          <ol className="m-0 mt-2 grid list-none gap-x-9 p-0 lg:grid-cols-3">
+            {LOOP.map((step, i) => (
+              <li key={step.n} className="loop-step plan-row" style={{ animationDelay: `${0.3 + i * 0.1}s` }}>
+                <span className="loop-num num">{step.n}</span>
+                <span>
+                  <strong>{step.title}.</strong> {step.text}
+                </span>
+              </li>
             ))}
           </ol>
+          <p className="mt-3 text-[15px] text-muted">
+            Two missions and a challenge fit in 10 minutes of active time. The clock stops when you pause or switch tabs, and the session is saved on this device after every action.
+          </p>
         </section>
 
-        <section className="sheet">
-          <p className="label">Who it is for</p>
-          <p className="mt-1">
-            <strong>{PERSONA.name}</strong>. {PERSONA.line}
-          </p>
-          <p className="mt-2 text-sm">{PERSONA.prior}</p>
-          <p className="mt-2 text-sm">{PERSONA.context}</p>
-          <p className="mt-2 text-sm">{PERSONA.motivation}</p>
-          <ul className="mt-2 space-y-1 pl-5 text-sm">
-            {PERSONA.misconceptions.map((x) => (
-              <li key={x}>{x}</li>
+        {/* AI pipeline */}
+        <section className="sheet rise r2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="label">What the AI does, and what checks it</p>
+            <label className="flex cursor-pointer items-center gap-2 text-[15px] font-semibold">
+              <input type="checkbox" className="h-4 w-4 accent-[var(--color-accent)]" checked={s.aiEnabled} onChange={() => dispatch({ type: 'toggleAi' })} />
+              AI coach {s.aiEnabled ? 'on' : 'off'}
+            </label>
+          </div>
+          <ol className="pipeline mt-3">
+            {PIPELINE.map((b, i) => (
+              <li key={b.title} className={`pipe-box plan-row ${i === 2 && !s.aiEnabled ? 'pipe-off' : ''} ${i === 3 ? 'pipe-check' : ''}`} style={{ animationDelay: `${0.35 + i * 0.09}s` }}>
+                <strong>{b.title}</strong>
+                <span>{b.text}</span>
+              </li>
             ))}
-          </ul>
+          </ol>
+          <p className="pipe-fallback">
+            <span className="num">↳</span> If the call fails, takes over 6 s, is switched off or fails a check, you get the written feedback instead, labelled <em>"Offline coach (recorded feedback)"</em>.
+          </p>
+          <p className="mt-3 text-[15px] text-muted">
+            The coach never calculates: every number on screen comes from the app's own physics code. The leak filter rejects any reply that states the relationship, a formula or the best angle.
+          </p>
         </section>
+      </div>
 
-        <section className="sheet">
-          <p className="label">What the AI does</p>
-          <p className="mt-1 text-sm">
-            One feature: an inquiry coach on the Interpret screen. It reads your hypothesis, prediction, trials and explanation, and asks one question. It never calculates: every number on screen comes from the app's own physics code.
-          </p>
-          <p className="mt-2 text-sm">
-            Its output is checked in code before you see it: valid format, an allowed verdict, a length limit, and a filter that rejects anything stating the relationship, a formula or the best angle. The app's own rules decide whether a conclusion is right. If the AI is slow, down or fails a check, you get the written feedback instead, labelled "offline coach (recorded feedback)".
-          </p>
-          <label className="mt-3 flex items-center gap-2 text-sm font-medium">
-            <input type="checkbox" className="h-4 w-4 accent-[var(--color-accent)]" checked={s.aiEnabled} onChange={() => dispatch({ type: 'toggleAi' })} />
-            AI coach on {s.aiEnabled ? '' : '(off: recorded feedback only)'}
-          </label>
-        </section>
+      {/* design notes: spoilers, so closed while a session is running */}
+      <details className="notes mt-7" open={!midSession}>
+        <summary>
+          <span className="label">Design notes for teachers and examiners</span>
+          <span className="text-[14px] italic text-muted">{midSession ? 'contains spoilers: open after you finish' : 'who this is for, what it teaches, what goes wrong'}</span>
+        </summary>
+        <div className="grid gap-x-10 gap-y-6 pt-4 lg:grid-cols-2">
+          <div>
+            <p className="label">The learner</p>
+            <p className="mt-1 text-[19px] font-semibold leading-snug">{PERSONA.name}</p>
+            <p className="text-[15px] text-muted">{PERSONA.line}</p>
+            <dl className="facts mt-3">
+              <dt>Knows</dt>
+              <dd>{PERSONA.prior}</dd>
+              <dt>Where, when</dt>
+              <dd>{PERSONA.context}</dd>
+              <dt>Wants</dt>
+              <dd>{PERSONA.motivation}</dd>
+            </dl>
+            <p className="label mt-5">Learning outcomes</p>
+            <ol className="mt-1 list-decimal space-y-1.5 pl-5 text-[15px]">
+              {OUTCOMES.map((o) => (
+                <li key={o}>{o}</li>
+              ))}
+            </ol>
+          </div>
+          <div>
+            <p className="label">Two misconceptions the lab is built around</p>
+            <div className="mt-2 space-y-4">
+              <div className="miscon">
+                <p className="num text-sm font-semibold text-bad">M1</p>
+                <div>
+                  <p className="font-semibold">"Double the speed, double the range."</p>
+                  <p className="text-[15px] text-muted">Mission 1 lets him predict 70.6 m, then measure 141.2 m himself.</p>
+                </div>
+              </div>
+              <div className="miscon">
+                <p className="num text-sm font-semibold text-bad">M2</p>
+                <div>
+                  <p className="font-semibold">"45° is always the best angle."</p>
+                  <p className="text-[15px] text-muted">Mission 2 moves the launch to a 12 m cliff, where it stops being true.</p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4">
+              <MiniBench
+                h={12}
+                xMax={22}
+                yMax={16}
+                shots={[
+                  { u: 10, angle: 45, cls: 'fig-dash' },
+                  { u: 10, angle: 29, cls: 'fig-accent draw', label: '18.7 m' },
+                ]}
+                caption="From 12 m at 10 m/s the 29° launch (solid, 18.7 m) beats 45° (dashed, 17.3 m)."
+              />
+            </div>
+          </div>
+        </div>
+      </details>
 
-        <section className="sheet">
-          <p className="label">Your data</p>
-          <p className="mt-1 text-sm">
-            Nothing leaves this device except the coach request. Predictions, trials, hints, revisions and timings are logged locally ({s.log.length} events) for evaluation.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-3">
+      {/* this session's evidence */}
+      <section className="sheet mt-7">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="label">This session, logged on this device</p>
+            <div className="mt-2 flex flex-wrap gap-x-8 gap-y-2">
+              {[
+                ['events', s.log.length],
+                ['trials', trials],
+                ['method notes', count('experiment_flag')],
+                ['hints', count('hint_requested')],
+                ['revisions', count('hypothesis_revised')],
+                ['AI calls', count('ai_call')],
+                ['fallbacks', count('ai_fallback')],
+              ].map(([name, value]) => (
+                <p key={name} className="m-0">
+                  <span className="num block text-[26px] font-semibold leading-none">{value}</span>
+                  <span className="label">{name}</span>
+                </p>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
             <button className="btn" onClick={() => downloadLog(s)}>
               Download log (JSON)
             </button>
@@ -927,13 +1037,13 @@ export function About({ s, dispatch }: P) {
               Clear saved session
             </button>
           </div>
-          <p className="label mt-5">Credits</p>
-          <p className="mt-1 text-sm">
-            Simulation idea inspired by the Virtual Physics Lab repository; no code from it is used. Built with Vite, React, TypeScript and Tailwind CSS, one Vercel serverless function, and the hyde/glm-5.3-flash model through the Hyde inference gateway. Fonts: Fraunces and IBM Plex.
-          </p>
-        </section>
-      </div>
-      <div className="mt-5">
+        </div>
+        <p className="mt-4 border-t border-rule pt-3 text-[14px] text-muted">
+          Nothing leaves this device except the coach request. <strong className="text-ink">Credits.</strong> Simulation idea inspired by the Virtual Physics Lab repository; no code from it is used. Built with Vite, React, TypeScript and Tailwind CSS, one Vercel serverless function, and the hyde/glm-5.3-flash model through the Hyde inference gateway. Type: Source Serif 4 and IBM Plex.
+        </p>
+      </section>
+
+      <div className="mt-6">
         <button className="btn btn-primary" onClick={() => dispatch({ type: 'view', view: 'main' })}>
           Back to the lab
         </button>
