@@ -11,12 +11,13 @@ import sys
 
 src, out = sys.argv[1], sys.argv[2]
 KEY = re.compile(r"sk-[-A-Za-z0-9_]{12,}")
+REMINDER = re.compile(r"<system-reminder[^>]*>.*?</system-reminder[^>]*>", re.S)  # inserted by the app, not typed by anyone
 TOOL_INPUT_LIMIT = 1200
 TOOL_RESULT_LIMIT = 1500
 
 
 def clean(text):
-    return KEY.sub("sk-[REDACTED]", text)
+    return KEY.sub("sk-[REDACTED]", REMINDER.sub("", text)).strip()
 
 
 def shorten(text, limit):
@@ -46,7 +47,8 @@ def render(content):
 lines = [
     "ET617 End-Sem 2026 · 23B0702 · AI chat log",
     "Tool: Claude Code (desktop app), one session. Exported with the app's session export and converted to text.",
-    "User and assistant messages are complete. Tool calls and results are shortened; API keys are redacted.",
+    "User and assistant messages are complete. Tool calls and results are shortened; API keys are redacted;",
+    "notices inserted automatically by the app (system reminders) are removed.",
     "=" * 100,
 ]
 count = 0
@@ -65,8 +67,11 @@ with open(src, encoding="utf-8") as f:
         only_tools = all(p.startswith("[tool result]") for p in parts)
         who = "TOOL OUTPUT" if only_tools else ("USER" if row["type"] == "user" else "ASSISTANT (Claude)")
         stamp = (row.get("timestamp") or "")[:19].replace("T", " ")
+        body = clean("\n\n".join(parts))
+        if not body:
+            continue
         lines.append(f"\n----- {who}  {stamp} UTC -----")
-        lines.append(clean("\n\n".join(parts)))
+        lines.append(body)
         count += 1
 
 with open(out, "w", encoding="utf-8") as f:
