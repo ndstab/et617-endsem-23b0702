@@ -102,8 +102,10 @@
 </table>
 <p><b>C4 visibly implemented.</b> (a) The top bar shows active time against 10:00 and each stage against its budget (4:00, 3:30, 2:00, 0:30). (b) The clock stops on "Pause &amp; leave", on the About screen and when the tab is hidden. (c) Every state change is saved under one key, <code>et617-23b0702-session-v1</code>; closing the tab and reopening lands on the resume card and continues at the exact step with trials, hints and hypotheses intact. (d) Past 10:00 the learner is not locked out: a banner offers "Jump to debrief" or "Keep going".</p>
 <div class="two">
-  <figure><img src="img/bench.png" alt="Lab bench" /><figcaption>Lab bench (Mission 1): ghost trails, readouts, trials table, scatter, checklist.</figcaption></figure>
-  <figure><img src="img/resume.png" alt="Resume card" /><figcaption>Resume card after closing and reopening the tab (C4).</figcaption></figure>
+  <figure><img src="img/home-live.png" alt="Home" /><figcaption>Home: a live bench (aim with the pointer, click to launch) and the 10-minute plan.</figcaption></figure>
+  <figure><img src="img/bench.png" alt="Lab bench" /><figcaption>Lab bench (Mission 1): strobe trail, dashed earlier trials, readouts, trials table, scatter, checklist.</figcaption></figure>
+  <figure><img src="img/resume.png" alt="Resume card" /><figcaption>C4: resume card after closing and reopening the tab; stepper shows time used against budget.</figcaption></figure>
+  <figure><img src="img/debrief.png" alt="Debrief" /><figcaption>Debrief: hypothesis v1 → v2, misconception seen, time against budget, take-away derivation.</figcaption></figure>
 </div>
 
 <h2>D5 · Two contrasting learner scenarios (run on the live app)</h2>
@@ -118,6 +120,8 @@
 <div class="two">
   <figure><img src="img/correct.png" alt="Correct path" /><figcaption>(a) Correct path: prediction confirmed, push-further question, model explanation.</figcaption></figure>
   <figure><img src="img/misconception.png" alt="Misconception path" /><figcaption>(b) Misconception path: prediction gap card and coach question; no answer revealed.</figcaption></figure>
+  <figure><img src="img/confound.png" alt="Confounded trial" /><figcaption>(b) Unsuccessful experiment: a confounded trial is struck out and a margin note asks which variable moved the range.</figcaption></figure>
+  <figure><img src="img/m2-misconception.png" alt="M2 path" /><figcaption>Misconception M2 ("45° is always best"): refuted by his own table, with a pointing question only.</figcaption></figure>
 </div>
 
 <h2>D6 · AI functionality specification</h2>
@@ -131,7 +135,27 @@
   <tr><th>Fallback</th><td>If the call fails, exceeds 6 seconds, is refused, or fails any check, the app shows the written rule-based feedback for that verdict with the label "Offline coach (recorded feedback)" and logs an <code>ai_fallback</code> event with the reason. The About screen has an "AI coach on" switch; with it off the whole app still works.</td></tr>
 </table>
 <h3>System prompt (verbatim from api/coach.ts)</h3>
-<pre id="prompt">PROMPT_PLACEHOLDER</pre>
+<pre id="prompt">You are a Socratic physics olympiad mentor inside a projectile-motion virtual lab.
+The learner is a strong Class 11 student who can already use R = u^2 sin(2 theta) / g. He is bored by routine practice, hates being spoon-fed and hates praise.
+
+You receive JSON with: mission, hypothesis, prediction, trials (his own recorded data), chosen_relation, explanation, rule_verdict, hint_level.
+- Mission &quot;m1&quot;: level ground, angle fixed at 30 degrees, he varies launch speed. Known misconception m1_linear: &quot;range is proportional to speed, so doubling the speed doubles the range&quot;.
+- Mission &quot;m2&quot;: launch from a 12 m cliff at 10 m/s, he varies the angle. Known misconception m2_always45: &quot;45 degrees is always the best angle&quot;.
+
+Your job:
+1. Classify his EXPLANATION as one of: &quot;correct&quot; (names the real mechanism), &quot;partial&quot; (right relationship, mechanism missing or vague), &quot;m1_linear&quot;, &quot;m2_always45&quot;, &quot;other&quot;.
+2. Ask ONE question, at most 40 words, that moves him one step forward using HIS OWN trials. Peer-level tone. No praise, no emojis.
+3. Suggest ONE next trial in words (which variable to change and in which direction), or an empty string if none is needed. The bench allows speed 5 to 50 m/s, angle 5 to 85 degrees, height 0 to 30 m.
+
+Hard rules:
+- Never state the relationship between range and speed.
+- Never state or write a formula.
+- Never state the best angle, and in mission m2 never name any specific angle between 20 and 40 degrees.
+- Never do arithmetic or quote a computed number that is not already in his trials.
+- If his explanation is correct, ask a question that extends it, do not repeat it back.
+
+Respond with ONLY a JSON object, no markdown, no other text:
+{&quot;verdict&quot;: &quot;correct&quot; | &quot;partial&quot; | &quot;m1_linear&quot; | &quot;m2_always45&quot; | &quot;other&quot;, &quot;question&quot;: string, &quot;suggest_trial&quot;: string}</pre>
 <h3>Example exchange from the live app (misconception path)</h3>
 <pre>Input (abridged): {"mission":"m1","hypothesis":"Range is proportional to speed, so doubling speed doubles range",
  "prediction":{"value":70.6,"confidence":"high"},
@@ -139,14 +163,18 @@
            {"n":3,"u":45,"angle":50,"h":0,"range":203.3},{"n":4,"u":40,"angle":30,"h":0,"range":141.2}],
  "chosen_relation":"u","explanation":"A faster ball just goes further, range follows the speed.","rule_verdict":"misconception"}
 
-Output shown to the learner: "Look at trials 1, 2 and 4, all at 30 degrees. When speed went from 20 to 30, did range grow by the
- same factor? What factor connects 20 to 40 versus 35.3 to 141.2?"</pre>
+Model output (passed all checks): {"verdict":"m1_linear","question":"Look at trials 1 and 4: you doubled the speed from 20 to 40
+ at 30 degrees. Did the range double? What ratio do you actually see there?","suggest_trial":"Run one more at 10 m/s, angle 30,
+ height 0, and compare its range against your 20 m/s run."}
+
+In the same walkthrough the Mission 2 reply failed the checks, so the learner saw the recorded feedback labelled
+"Offline coach (recorded feedback)" and an ai_fallback event was logged.</pre>
 
 <h2>D7 · Pedagogical rationale</h2>
 <p><b>How the design supports learning.</b> The sequence is predict → observe → explain. A fluent learner will not re-examine a formula he trusts unless his own committed prediction fails, so the app withholds all theory until he has (1) committed a number, a hypothesis and a confidence level, (2) produced his own data, and (3) stated a conclusion. The cognitive conflict is made concrete on the prediction gap card: his number next to his measurement, and a ratio computed from his own rows. A wrong prediction made with high confidence is called out ("You were sure, which makes this worth your time") because confidently held errors are the ones most worth correcting. The challenge tasks then ask him to transfer the idea (complementary angles; the tie breaking from a height) so that the level-ground formula is repositioned as a special case.</p>
-<p><b>Feedback and scaffolding.</b> Feedback is contingent: correct answers get a harder question instead of praise; misconceptions get one question that points at the flawed assumption; three hint levels move from "what to look at" to "what to compute" to "the structure of the argument", and the learner chooses when to take them. The bench also coaches the method (LO3): confounded trials, too few points, bunched values and one-sided searches each trigger a specific note. Topic tools are built in: a metre scale and equal-scale axes on the bench, a computed-ratio column (R ÷ u, R ÷ u², R ÷ √u) and a scatter of his own trials with no theory curve.</p>
+<p><b>Feedback and scaffolding.</b> Feedback is contingent: correct answers get a harder question instead of praise; misconceptions get one question that points at the flawed assumption; three hint levels move from "what to look at" to "what to compute" to "the structure of the argument", and the learner chooses when to take them. The bench also coaches the method (LO3): confounded trials, too few points, bunched values and one-sided searches each trigger a specific note. Topic tools are built in: a metre scale and equal-scale axes on the bench, a strobe trail (the ball's position at equal time steps) with velocity-component arrows in flight, a computed-ratio column (R ÷ u, R ÷ u², R ÷ √u) and a scatter of his own trials with no theory curve.</p>
 <div class="box"><b>Answer to the P5 design challenge.</b> <i>How will the system support learning from an unsuccessful experiment without simply revealing the correct answer?</i> An unsuccessful experiment here is a refuted prediction or a confounded set of trials. The system responds only with the learner's own evidence and with questions: the gap card (predicted vs measured, ratio between his rows), one pointing question, optional graded hints, and a way back to the bench. The correct relationship, the formula and the best angle are never shown on this path: the written feedback does not contain them, and AI output containing them is rejected by the leak filter. The model explanation appears only after he has committed to a revised conclusion; if he is still wrong after two revisions it is given, but tied to his own table rows. The misconception path in D5(b) shows this.</div>
-<p><b>How C4 shaped the design.</b> Ten minutes forced two short missions instead of one long open exploration, a per-stage budget on the stepper, a fast launch (under a second), one combined hypothesis-and-reason field, and a debrief of 30 seconds. Because he is interrupted often, state is saved on every action and the resume card says exactly where he stopped. The clock counts active time only so that an interruption does not eat the budget, and running over is shown but never punished.</p>
+<p><b>How C4 shaped the design.</b> Ten minutes forced two short missions instead of one long open exploration, a per-stage budget on the stepper, a fast launch (0.9 to 1.7 seconds, longer when the time in the air is longer), one combined hypothesis-and-reason field, and a debrief of 30 seconds. Because he is interrupted often, state is saved on every action and the resume card says exactly where he stopped. The clock counts active time only so that an interruption does not eat the budget, and running over is shown but never punished.</p>
 <p><b>How L6 shaped the design.</b> No theory-first page, no praise, no multiple-choice drill: a strong learner gets surprise, evidence and a harder follow-up. The variables are not fully locked (he can change the angle in Mission 1), so designing a controlled experiment is a real decision he can get wrong. The take-away is a derivation (tan θ = u / √(u² + 2gh)), which is the level this learner wants.</p>
 
 <h2>D8 · Evaluation plan</h2>
@@ -166,7 +194,7 @@ Output shown to the learner: "Look at trials 1, 2 and 4, all at 30 degrees. When
   <tr><td>1</td><td>Claude Code (desktop app), one session</td><td>Reading the exam paper and listing deadlines; creating the repository; validating my design write-up against the deliverables; writing the code, DESIGN.md and this report draft; deploying to Vercel; testing both learner paths on the live app; two rounds of visual mockups.</td><td>Full chat log submitted as .txt on Moodle</td></tr>
   <tr><td>2</td><td>hyde/glm-5.3-flash (Hyde inference gateway)</td><td>The in-app inquiry coach (D6). Not used for writing code or content.</td><td>Prompt in D6 and in <code>api/coach.ts</code></td></tr>
 </table>
-<p><b>What was mine.</b> The card choice, the learner, the two misconceptions, the three outcomes, all six tasks with their numbers and accepted ranges, the feedback rules (never reveal on the misconception path, push further on the correct path), the leak-filter idea, the rule-verdict-wins rule and the 10-minute budget were written by me before any code was generated. I asked the assistant not to choose the card for me.</p>
+<p><b>What was mine.</b> The card choice, the learner, the two misconceptions, the three outcomes, all six tasks with their numbers and accepted ranges, the feedback rules (never reveal on the misconception path, push further on the correct path), the leak-filter idea, the rule-verdict-wins rule and the 10-minute budget were written by me before any code was generated. I asked the assistant not to choose the card for me. I also chose the visual direction ("C1 · classic text") from two rounds of mockups and asked for the home page and the bench to feel alive rather than static.</p>
 <p><b>Where I accepted AI suggestions.</b> (1) Leaving the angle unlocked in Mission 1, so a confounded experiment is actually possible and LO3 is a real decision. (2) Requiring that the predicted case (40 m/s, or my estimated angle) is one of the trials, so the gap card always has a measurement to compare with. (3) Merging "one-line reason" and "hypothesis" into one field to save time inside the 10 minutes. (4) A computed-ratio column and equal-scale axes as topic tools.</p>
 <p><b>Where the AI was wrong or needed checking.</b> (1) It first scaffolded Next.js; I had specified Vite, so the starter was replaced. (2) The first model configuration spent its whole token budget on hidden reasoning and returned nothing; this was found by testing the endpoint and fixed with <code>reasoning_effort: "low"</code>. (3) A test reply from the coach said "does the range double or quadruple", which gives the answer away; the leak filter now rejects "quadrupl…". (4) The coach suggested a 60 m/s trial although the slider stops at 50; the prompt now states the slider limits. (5) The launch animation depended on animation frames and could fail to "land" in a background tab; a timer now guarantees it. (6) All physics numbers in my write-up were re-computed in code before use (35.3, 141.2, 17.3, 18.7, 28.6°, 45.9, 93.0, 79.9).</p>
 <p><b>Judgement.</b> I kept the AI away from anything that decides correctness: verdicts come from numeric rules, numbers come from <code>physics.ts</code>, and the coach can only ask a question that has passed the checks. That is also why the app works with the AI switched off.</p>
