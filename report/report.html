@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>ET617 End-Sem Report · 23B0702 · P5-T10-L6-C4</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm; }
+  body { font: 10.5pt/1.42 "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif; color: #111; margin: 0; }
+  h1 { font-size: 18pt; margin: 0 0 2pt; }
+  h2 { font-size: 13pt; margin: 16pt 0 5pt; padding-bottom: 2pt; border-bottom: 1.2pt solid #111; break-after: avoid; }
+  h3 { font-size: 10.5pt; margin: 9pt 0 3pt; break-after: avoid; }
+  p { margin: 0 0 6pt; }
+  ul, ol { margin: 0 0 6pt; padding-left: 16pt; }
+  li { margin-bottom: 2pt; }
+  table { border-collapse: collapse; width: 100%; margin: 4pt 0 8pt; font-size: 9.5pt; }
+  th, td { border: 0.6pt solid #999; padding: 3pt 5pt; text-align: left; vertical-align: top; }
+  th { background: #f0f0f0; }
+  code, pre { font: 8.4pt/1.35 "IBM Plex Mono", Menlo, monospace; }
+  pre { background: #f5f5f5; border: 0.6pt solid #ccc; padding: 6pt; white-space: pre-wrap; margin: 4pt 0 8pt; }
+  figure { margin: 6pt 0 10pt; break-inside: avoid; }
+  figure img { width: 100%; border: 0.6pt solid #999; }
+  figcaption { font-size: 9pt; color: #444; margin-top: 2pt; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8pt; }
+  .small { font-size: 9pt; color: #444; }
+  .box { border: 0.8pt solid #111; padding: 6pt 8pt; margin: 4pt 0 8pt; }
+</style>
+</head>
+<body>
+
+<h1>Range Lab: a 10-minute inquiry lab on projectile range</h1>
+<p class="small">ET 617-2026 End-Semester Examination · 18 November 2026 · Sajjad Nakhwa · 23B0702</p>
+
+<h2>Identity card</h2>
+<table>
+  <tr><th style="width:22%">Roll no. (ID)</th><td>23B0702</td></tr>
+  <tr><th>P · Problem</th><td>P5 · Inquiry-based virtual laboratory</td></tr>
+  <tr><th>T · Topic</th><td>P5-T10 · Projectile motion: angle and speed vs range (Cl. 11)</td></tr>
+  <tr><th>L · Learner context</th><td>L6 · High-achieving learner preparing for an Olympiad, bored by routine practice</td></tr>
+  <tr><th>C · Design constraint</th><td>C4 · 10-minute sessions: one complete sequence fits in 10 minutes; stop and resume where you left off</td></tr>
+  <tr><th>Live app</th><td>https://et617-23b0702.vercel.app</td></tr>
+  <tr><th>Repository</th><td>https://github.com/ndstab/et617-endsem-23b0702</td></tr>
+  <tr><th>Identity token</th><td>"ET617 · 23B0702 · P5-T10-L6-C4" in the footer of every screen and on the About screen</td></tr>
+</table>
+
+<h2>D1 · Educational problem</h2>
+<p>Strong Class 11 students can substitute into R = u² sin 2θ / g without thinking, and that fluency hides two gaps: they scale range linearly with speed, and they carry "45° is the best angle" to launches where it is false. Routine problem sheets never expose these gaps, because the formula always returns the right number and the student is never asked to commit before computing. Range Lab makes the learner commit to a prediction first, lets his own experiment confirm or refute it, and only then asks him to explain. The learner works alone at home on a laptop, in the 10 to 15 minute gaps between coaching problem sets, so one full sequence has to fit in 10 minutes and survive being interrupted.</p>
+<h3>Learning outcomes</h3>
+<ol>
+  <li><b>LO1 · Predict and explain.</b> Predict how range changes when launch speed is scaled at a fixed angle, and explain it using the fact that both horizontal velocity and time in the air scale with u.</li>
+  <li><b>LO2 · Compare and explain.</b> Compare ranges across angles for a level launch and an elevated launch, and explain why the best angle drops below 45° when launching from a height.</li>
+  <li><b>LO3 · Design and revise.</b> Design a controlled experiment (change one variable, at least 3 values) and use the data to revise a stated hypothesis.</li>
+</ol>
+<p><b>Context of use.</b> Where: at home, alone. When: short gaps between coaching problem sets, typically late evening. Device: his own laptop with a browser; no login and no install. Language: English.</p>
+
+<h2>D2 · Learner persona</h2>
+<table>
+  <tr><th style="width:22%">Name, age</th><td>Aarav Kulkarni, 16, Class 11, Pune. Preparing for NSEP and the physics olympiad.</td></tr>
+  <tr><th>Prior knowledge</th><td>Kinematics equations, resolving vectors into components, trig identities (including sin 2θ), basic differentiation. Can plug into R = u² sin 2θ / g fluently. Has not been asked where the formula comes from or when it stops being true.</td></tr>
+  <tr><th>Misconception M1</th><td>"Range is proportional to speed: double the speed, double the range." He treats the scaling linearly when asked quickly, even though the formula he knows says u².</td></tr>
+  <tr><th>Misconception M2</th><td>"45° is always the best angle." He over-generalises the level-ground result to a launch from a height.</td></tr>
+  <tr><th>Device, time</th><td>Own laptop at home; 10 to 15 minutes at a time; often interrupted by the next problem set.</td></tr>
+  <tr><th>Language</th><td>English (school and coaching medium).</td></tr>
+  <tr><th>Motivation</th><td>Problems that surprise him, and being proven wrong by evidence. Hates being spoon-fed and hates praise spam. Bored by plug-and-chug sheets.</td></tr>
+</table>
+
+<h2>D3 · Educational content</h2>
+<p><b>Concept explanation (shown only after the learner states his own conclusion, and again in the debrief).</b> Range is horizontal velocity × time in the air: R = uₓ × T. On level ground, doubling u doubles uₓ and also doubles T (T = 2u sin θ / g), so the range goes up four times: R ∝ u². From a height, the ball keeps moving forward during the extra fall time, so it pays to trade some vertical velocity for more horizontal velocity: a flatter angle wins. 45° is the best angle only when launch and landing heights are equal. The app draws range as the area of a rectangle with sides uₓ and T (Fig. 3 in the app) so that "four tiles, not two" is visible.</p>
+<table>
+  <tr><th style="width:4%">#</th><th style="width:14%">Stage · format</th><th>Task (actual text)</th><th style="width:30%">Model answer</th></tr>
+  <tr><td>1</td><td>Mission 1 · numeric prediction</td><td>"Level ground. The launch angle is fixed at 30°. At u = 20 m/s the ball lands 35.3 m away. Now you double the speed to 40 m/s. Predict the range at 40 m/s." Plus a one-line hypothesis and a confidence rating.</td><td>141.2 m (accepted within 5%). 70.6 m (within 5%) is classified as M1.</td></tr>
+  <tr><td>2</td><td>Mission 1 · experiment</td><td>"Test your prediction. Change one thing: speed. Hold the angle at 30°. Record at least 3 different speeds, and make one of them 40 m/s."</td><td>A controlled table, e.g. 20, 30, 40 m/s at 30° giving 35.3, 79.5, 141.2 m.</td></tr>
+  <tr><td>3</td><td>Mission 1 · choice + free text</td><td>"From YOUR table, range is proportional to: u / u² / √u / can't tell from this data." Then "Explain why, in one or two sentences."</td><td>u². Doubling u doubles the horizontal velocity and also doubles the time in the air; range is the product, so it goes up 4 times.</td></tr>
+  <tr><td>4</td><td>Mission 2 · choice + numeric, experiment, free text</td><td>"Now you launch from the edge of a 12 m cliff at u = 10 m/s. Which angle gives the longest range: below 45° / exactly 45° / above 45°? Estimate the best angle." Then at least 4 angles at 10 m/s including his estimate, then the same conclusion form as task 3.</td><td>Below 45°, about 29° (26 to 32 accepted): 18.7 m against 17.3 m at 45°. "Exactly 45°" is classified as M2.</td></tr>
+  <tr><td>5</td><td>Challenge · numeric + yes/no</td><td>"Level ground, u = 30 m/s. A 27° launch and which other angle land at the same spot?" Follow-up: "Does that pair still tie from the 12 m cliff?"</td><td>63° (complementary angles; sin 54° = sin 126°). No: from 12 m, 27° gives 93.0 m and 63° gives 79.9 m.</td></tr>
+  <tr><td>6</td><td>Challenge · hit the target in the simulation</td><td>"Level ground, u locked at 30 m/s. Land the ball in the target zone at 45.9 m (± 1.5 m). Find TWO different angles that do it."</td><td>15° and 75°.</td></tr>
+</table>
+<p>Six tasks in four formats: numeric entry, controlled experiment, choice with free-text explanation, and hit-the-target in the simulation.</p>
+<h3>Feedback (actual text in the app)</h3>
+<table>
+  <tr><th style="width:17%">Case</th><th>Mission 1 (speed)</th><th>Mission 2 (angle from a cliff)</th></tr>
+  <tr><td><b>Correct</b></td><td>"Your data and your reasoning agree. So it was 4×. Will tripling the speed give 6× or 9×? Check it with one shot." The model explanation and the area figure follow.</td><td>"Your table and your reasoning agree. Flatter wins from 12 m. If you raise the speed to 20 m/s, does the best angle move toward 45° or away from it? Predict, then check."</td></tr>
+  <tr><td><b>Misconception</b> (M1 / M2)</td><td>Prediction gap card: "You predicted 70.6 m · You measured 141.2 m · Your rows #1 and #4: u × 2.0 → R × 4.0. Your model says range follows speed. Range is horizontal speed × time in the air. Which of those did you assume stays the same when u doubles?" On the conclusion: "Your own table does not support 'proportional to u'. If R followed u, what would R ÷ u be in every row? Compute it for two of your rows."</td><td>"You said 45°. Your 45° shot went 17.3 m. Try a few angles on both sides of it. On level ground the ball lands when it comes back to launch height. Where is it at that moment here, and what is it still doing?" On the conclusion: "Your table puts the peak at 45° only because of where you looked."</td></tr>
+  <tr><td><b>Other wrong</b></td><td>"That does not match your rows yet. Pick your slowest and fastest trial. By what factor did u change, and by what factor did R change? If you cannot tell, your speeds are too close together."</td><td>"Your table does not show that yet. Scan from 15° to 60° in steps of 10° or less. Then say where the longest range sits."</td></tr>
+  <tr><td><b>Right relation, weak mechanism</b></td><td>"The relationship is right. The mechanism is not there yet. Range is horizontal speed × time in the air. What does doubling u do to each of them?"</td><td>"The direction is right. The mechanism is not there yet. The ball passes launch height on its way down and keeps going. What is it still doing during that extra fall?"</td></tr>
+</table>
+<p><b>Hints (three levels, none gives the answer).</b> Mission 1: (1) "Look at how R changes each time u changes. Compare ratios between rows, not differences." (2) "Divide R by u for each row. Constant? Now try R divided by u². The table can add that column for you." (3) "Range = uₓ × T. Write how each of the two depends on u." Mission 2 has the same three-level structure.</p>
+<p><b>Responses to how he experiments (rule-based).</b> "Trials #2 and #3: you changed speed and angle together. Which one moved the range? You can't tell from this pair." · "Two points fit a line and a curve equally well. Add a third before you read a pattern into it." · "All your speeds are within 5 m/s of each other. The spread is too small to see a pattern." · "You have only tried 45° and above. That is one side of the question."</p>
+
+<h2>D4 · Working application</h2>
+<p><b>URL:</b> https://et617-23b0702.vercel.app · <b>Stack:</b> Vite + React + TypeScript + Tailwind CSS, single-page app, one Vercel serverless function (<code>/api/coach</code>). No login, no database; everything is saved in <code>localStorage</code>. The project was first scaffolded with <code>create-next-app</code> and then replaced with a hand-written Vite setup (both visible in the commit history); no UI library and no code from the course project is used.</p>
+<h3>Screen map</h3>
+<table>
+  <tr><th style="width:4%">#</th><th style="width:19%">Screen / state</th><th>Learner input</th><th>System output</th><th style="width:17%">Goes to</th></tr>
+  <tr><td>1</td><td>Home / Resume card</td><td>Start, Resume, Start over</td><td>10-minute plan with per-stage budget; if a session exists: "You stopped at Mission 2 · Experiment, 5 trials recorded, 5:40 used."</td><td>2, or the saved step</td></tr>
+  <tr><td>2</td><td>Predict (×2 missions)</td><td>Numeric prediction (and a choice in Mission 2), one-line hypothesis, confidence</td><td>Scenario figure; no verdict</td><td>3</td></tr>
+  <tr><td>3</td><td>Lab bench (×2)</td><td>Sliders, Launch, Record trial, add a computed column, hint</td><td>Trajectory with ghost trails and metre scale, readouts, trials table, scatter of his trials, checklist, experiment notes</td><td>4</td></tr>
+  <tr><td>4</td><td>Interpret &amp; revise (×2)</td><td>Relationship choice, explanation, keep or rewrite hypothesis</td><td>Prediction gap card, coach question (AI or recorded), model explanation only after a committed conclusion</td><td>3 (more trials), next mission, or 5</td></tr>
+  <tr><td>5</td><td>Challenge</td><td>Angle entry, yes/no, launches at a target</td><td>Three-way feedback, hit counter, miss distance</td><td>6</td></tr>
+  <tr><td>6</td><td>Debrief</td><td>Show derivation, download log</td><td>Hypothesis history v1 → vN, misconception seen, hints, time against budget, model explanations, take-away derivation</td><td>1</td></tr>
+  <tr><td>7</td><td>About</td><td>AI on/off, download log, clear session</td><td>Identity, card, persona, outcomes, what the AI does, credits</td><td>back</td></tr>
+  <tr><td>8</td><td>Top bar (every screen)</td><td>Pause &amp; leave, About</td><td>Stepper with time used / budget per stage, active timer out of 10:00</td><td>1</td></tr>
+</table>
+<p><b>C4 visibly implemented.</b> (a) The top bar shows active time against 10:00 and each stage against its budget (4:00, 3:30, 2:00, 0:30). (b) The clock stops on "Pause &amp; leave", on the About screen and when the tab is hidden. (c) Every state change is saved under one key, <code>et617-23b0702-session-v1</code>; closing the tab and reopening lands on the resume card and continues at the exact step with trials, hints and hypotheses intact. (d) Past 10:00 the learner is not locked out: a banner offers "Jump to debrief" or "Keep going".</p>
+<div class="two">
+  <figure><img src="img/bench.png" alt="Lab bench" /><figcaption>Lab bench (Mission 1): ghost trails, readouts, trials table, scatter, checklist.</figcaption></figure>
+  <figure><img src="img/resume.png" alt="Resume card" /><figcaption>Resume card after closing and reopening the tab (C4).</figcaption></figure>
+</div>
+
+<h2>D5 · Two contrasting learner scenarios (run on the live app)</h2>
+<table>
+  <tr><th style="width:16%"></th><th>(a) Learner who responds correctly</th><th>(b) Learner who shows misconception M1</th></tr>
+  <tr><td>Prediction</td><td>141 m, "range goes as u² because both uₓ and T double", confidence high</td><td>70.6 m, "range is proportional to speed, so doubling speed doubles range", confidence high</td></tr>
+  <tr><td>Experiment</td><td>20, 30, 40 m/s at 30°</td><td>20, 30 m/s, then 45 m/s at 50° (confounded), then 40 m/s at 30°</td></tr>
+  <tr><td>System response at the bench</td><td>Checklist completes; no notes</td><td>Note: "you changed speed and angle together … You can't tell from this pair"; the confounded row is struck through and does not count</td></tr>
+  <tr><td>Prediction gap card</td><td>"Prediction confirmed · Your model held. Now pin down why it is that factor and not another."</td><td>"Prediction refuted · You predicted 70.6 m · You measured 141.2 m · u × 2.0 → R × 4.0 · You were sure, which makes this worth your time. … Which of those did you assume stays the same when u doubles?"</td></tr>
+  <tr><td>After the conclusion</td><td>Verdict "Holds"; push-further question (tripling: 6× or 9×?); model explanation and area figure shown immediately</td><td>Verdict "Refuted by your data"; one coach question; the model explanation is withheld; he revises the hypothesis, may return to the bench, and can ask for graded hints</td></tr>
+</table>
+<div class="two">
+  <figure><img src="img/correct.png" alt="Correct path" /><figcaption>(a) Correct path: prediction confirmed, push-further question, model explanation.</figcaption></figure>
+  <figure><img src="img/misconception.png" alt="Misconception path" /><figcaption>(b) Misconception path: prediction gap card and coach question; no answer revealed.</figcaption></figure>
+</div>
+
+<h2>D6 · AI functionality specification</h2>
+<p>There is one AI feature: the <b>inquiry coach</b> on the Interpret screen. Everything else (physics, verdicts, experiment notes, hints, model answers) is deterministic code.</p>
+<table>
+  <tr><th style="width:20%">What the AI does</th><td>Reads the learner's explanation against his own trials, classifies it, and asks ONE Socratic question (at most 40 words) plus one suggested next trial. It never calculates and never decides right or wrong on its own.</td></tr>
+  <tr><th>Model call</th><td><code>POST https://inference.hyde.tech/v1/chat/completions</code>, model <code>hyde/glm-5.3-flash</code>, <code>reasoning_effort: "low"</code>, <code>max_tokens: 700</code>, from the serverless function <code>api/coach.ts</code>. The key is a Vercel environment variable (<code>HYDE_API_KEY</code>), never in the repository. Typical latency 1 to 3 s.</td></tr>
+  <tr><th>Input it receives</th><td>JSON: <code>mission</code>, <code>hypothesis</code>, <code>prediction {value, choice, confidence}</code>, <code>trials [{n, u, angle, h, range, time}]</code>, <code>chosen_relation</code>, <code>explanation</code>, <code>rule_verdict</code> (from the app's own rules), <code>hint_level</code>.</td></tr>
+  <tr><th>Output</th><td><code>{"verdict": "correct" | "partial" | "m1_linear" | "m2_always45" | "other", "question": string, "suggest_trial": string}</code></td></tr>
+  <tr><th>Checks before the learner sees it</th><td>In <code>checkReply()</code> on the server: (1) parses as JSON; (2) verdict is one of the five allowed values; (3) question present and under 300 characters, suggestion under 200; (4) leak filter rejects any reply containing "u²", "u^2", "squared", "four times", "4x", "quadrupl…", "sin 2", "below 45", "less than 45" and similar; (5) in Mission 2, any number from 26 to 32 is rejected (the best angle is about 29°). On the client: (6) the rule verdict wins. The AI's verdict can only downgrade a rule-correct conclusion to "half way" when the explanation does not name the mechanism; it can never mark a wrong relationship as right.</td></tr>
+  <tr><th>Fallback</th><td>If the call fails, exceeds 6 seconds, is refused, or fails any check, the app shows the written rule-based feedback for that verdict with the label "Offline coach (recorded feedback)" and logs an <code>ai_fallback</code> event with the reason. The About screen has an "AI coach on" switch; with it off the whole app still works.</td></tr>
+</table>
+<h3>System prompt (verbatim from api/coach.ts)</h3>
+<pre id="prompt">PROMPT_PLACEHOLDER</pre>
+<h3>Example exchange from the live app (misconception path)</h3>
+<pre>Input (abridged): {"mission":"m1","hypothesis":"Range is proportional to speed, so doubling speed doubles range",
+ "prediction":{"value":70.6,"confidence":"high"},
+ "trials":[{"n":1,"u":20,"angle":30,"h":0,"range":35.3},{"n":2,"u":30,"angle":30,"h":0,"range":79.5},
+           {"n":3,"u":45,"angle":50,"h":0,"range":203.3},{"n":4,"u":40,"angle":30,"h":0,"range":141.2}],
+ "chosen_relation":"u","explanation":"A faster ball just goes further, range follows the speed.","rule_verdict":"misconception"}
+
+Output shown to the learner: "Look at trials 1, 2 and 4, all at 30 degrees. When speed went from 20 to 30, did range grow by the
+ same factor? What factor connects 20 to 40 versus 35.3 to 141.2?"</pre>
+
+<h2>D7 · Pedagogical rationale</h2>
+<p><b>How the design supports learning.</b> The sequence is predict → observe → explain. A fluent learner will not re-examine a formula he trusts unless his own committed prediction fails, so the app withholds all theory until he has (1) committed a number, a hypothesis and a confidence level, (2) produced his own data, and (3) stated a conclusion. The cognitive conflict is made concrete on the prediction gap card: his number next to his measurement, and a ratio computed from his own rows. A wrong prediction made with high confidence is called out ("You were sure, which makes this worth your time") because confidently held errors are the ones most worth correcting. The challenge tasks then ask him to transfer the idea (complementary angles; the tie breaking from a height) so that the level-ground formula is repositioned as a special case.</p>
+<p><b>Feedback and scaffolding.</b> Feedback is contingent: correct answers get a harder question instead of praise; misconceptions get one question that points at the flawed assumption; three hint levels move from "what to look at" to "what to compute" to "the structure of the argument", and the learner chooses when to take them. The bench also coaches the method (LO3): confounded trials, too few points, bunched values and one-sided searches each trigger a specific note. Topic tools are built in: a metre scale and equal-scale axes on the bench, a computed-ratio column (R ÷ u, R ÷ u², R ÷ √u) and a scatter of his own trials with no theory curve.</p>
+<div class="box"><b>Answer to the P5 design challenge.</b> <i>How will the system support learning from an unsuccessful experiment without simply revealing the correct answer?</i> An unsuccessful experiment here is a refuted prediction or a confounded set of trials. The system responds only with the learner's own evidence and with questions: the gap card (predicted vs measured, ratio between his rows), one pointing question, optional graded hints, and a way back to the bench. The correct relationship, the formula and the best angle are never shown on this path: the written feedback does not contain them, and AI output containing them is rejected by the leak filter. The model explanation appears only after he has committed to a revised conclusion; if he is still wrong after two revisions it is given, but tied to his own table rows. The misconception path in D5(b) shows this.</div>
+<p><b>How C4 shaped the design.</b> Ten minutes forced two short missions instead of one long open exploration, a per-stage budget on the stepper, a fast launch (under a second), one combined hypothesis-and-reason field, and a debrief of 30 seconds. Because he is interrupted often, state is saved on every action and the resume card says exactly where he stopped. The clock counts active time only so that an interruption does not eat the budget, and running over is shown but never punished.</p>
+<p><b>How L6 shaped the design.</b> No theory-first page, no praise, no multiple-choice drill: a strong learner gets surprise, evidence and a harder follow-up. The variables are not fully locked (he can change the angle in Mission 1), so designing a controlled experiment is a real decision he can get wrong. The take-away is a derivation (tan θ = u / √(u² + 2gh)), which is the level this learner wants.</p>
+
+<h2>D8 · Evaluation plan</h2>
+<table>
+  <tr><th style="width:9%">Outcome</th><th>Assessment items / rubric</th><th>Log data used</th><th style="width:25%">Success</th></tr>
+  <tr><td>LO1</td><td>Post-test: (i) "At a fixed angle, speed goes from 15 to 45 m/s. By what factor does the range change, and why?" (ii) explain-in-two-sentences item scored 0 to 2: 2 = names both uₓ and T scaling, 1 = says u² without mechanism, 0 = linear.</td><td><code>prediction_submitted</code> (verdict, confidence), <code>task_answered</code> for the Mission 1 conclusion, number of attempts, <code>hypothesis_revised</code></td><td>At least 80% score 2 on the post-test item; learners who predicted 70.6 m reach a correct conclusion within 3 attempts</td></tr>
+  <tr><td>LO2</td><td>Post-test: "From a 20 m tower at 15 m/s, is the best angle above, at or below 45°? Explain." Delayed transfer after one week: the same question for a launch that lands on a raised platform (best angle above 45°). Rubric 0 to 2 on the mechanism (forward motion during the extra fall).</td><td>Mission 2 prediction choice and estimate, angles tried, <code>experiment_flag: one-side</code>, task 5 follow-up answer</td><td>At least 75% correct direction with mechanism on the post-test; at least 60% on the delayed transfer item</td></tr>
+  <tr><td>LO3</td><td>Process rubric scored from the log: controlled trials (0/1), at least 3 distinct values with adequate spread (0/1), predicted case tested (0/1), hypothesis revised after a refuted prediction (0/1).</td><td><code>trial_recorded</code> sequences, <code>experiment_flag</code> events (confound, bunched, two-points), <code>hypothesis_revised</code></td><td>Fewer confound flags in Mission 2 than in Mission 1 for the same learner; at least 80% score 3 of 4</td></tr>
+  <tr><td>C4</td><td>Does one sequence fit in 10 minutes, and does resume work?</td><td><code>elapsedSeconds</code>, per-stage seconds, <code>pause</code> / <code>resume</code> events</td><td>Median active time at debrief ≤ 10:00; every resumed session continues at the saved step</td></tr>
+  <tr><td>AI</td><td>Is the coach safe and useful?</td><td><code>ai_call</code> latency, <code>ai_fallback</code> reasons</td><td>Zero leaked answers in a manual review of 50 coach replies; fallback rate under 15%</td></tr>
+</table>
+<p>The app already records all of these events with timestamps; "Download log (JSON)" on the About and Debrief screens exports them. A small pilot (8 to 10 olympiad aspirants, pre-test of two prediction items, the lab, then the post-test, with a one-week delayed transfer item) would be enough to check the targets above.</p>
+
+<h2>AI-use log and reflection</h2>
+<table>
+  <tr><th style="width:5%">#</th><th style="width:22%">Tool</th><th>Used for</th><th style="width:22%">Export</th></tr>
+  <tr><td>1</td><td>Claude Code (desktop app), one session</td><td>Reading the exam paper and listing deadlines; creating the repository; validating my design write-up against the deliverables; writing the code, DESIGN.md and this report draft; deploying to Vercel; testing both learner paths on the live app; two rounds of visual mockups.</td><td>Full chat log submitted as .txt on Moodle</td></tr>
+  <tr><td>2</td><td>hyde/glm-5.3-flash (Hyde inference gateway)</td><td>The in-app inquiry coach (D6). Not used for writing code or content.</td><td>Prompt in D6 and in <code>api/coach.ts</code></td></tr>
+</table>
+<p><b>What was mine.</b> The card choice, the learner, the two misconceptions, the three outcomes, all six tasks with their numbers and accepted ranges, the feedback rules (never reveal on the misconception path, push further on the correct path), the leak-filter idea, the rule-verdict-wins rule and the 10-minute budget were written by me before any code was generated. I asked the assistant not to choose the card for me.</p>
+<p><b>Where I accepted AI suggestions.</b> (1) Leaving the angle unlocked in Mission 1, so a confounded experiment is actually possible and LO3 is a real decision. (2) Requiring that the predicted case (40 m/s, or my estimated angle) is one of the trials, so the gap card always has a measurement to compare with. (3) Merging "one-line reason" and "hypothesis" into one field to save time inside the 10 minutes. (4) A computed-ratio column and equal-scale axes as topic tools.</p>
+<p><b>Where the AI was wrong or needed checking.</b> (1) It first scaffolded Next.js; I had specified Vite, so the starter was replaced. (2) The first model configuration spent its whole token budget on hidden reasoning and returned nothing; this was found by testing the endpoint and fixed with <code>reasoning_effort: "low"</code>. (3) A test reply from the coach said "does the range double or quadruple", which gives the answer away; the leak filter now rejects "quadrupl…". (4) The coach suggested a 60 m/s trial although the slider stops at 50; the prompt now states the slider limits. (5) The launch animation depended on animation frames and could fail to "land" in a background tab; a timer now guarantees it. (6) All physics numbers in my write-up were re-computed in code before use (35.3, 141.2, 17.3, 18.7, 28.6°, 45.9, 93.0, 79.9).</p>
+<p><b>Judgement.</b> I kept the AI away from anything that decides correctness: verdicts come from numeric rules, numbers come from <code>physics.ts</code>, and the coach can only ask a question that has passed the checks. That is also why the app works with the AI switched off.</p>
+
+</body>
+</html>
