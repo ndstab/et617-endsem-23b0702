@@ -947,6 +947,25 @@ export function About({ s, dispatch }: P) {
         </section>
       </div>
 
+      {/* the learner persona: always visible (the misconceptions stay in the design notes below) */}
+      <section className="sheet mt-7 rise r2">
+        <p className="label">Who this lab is for · learner persona</p>
+        <div className="mt-1 grid gap-x-10 gap-y-3 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.6fr)]">
+          <div>
+            <p className="text-[24px] font-semibold leading-tight">{PERSONA.name}</p>
+            <p className="text-[15px] text-muted">{PERSONA.line}</p>
+          </div>
+          <dl className="facts">
+            <dt>Knows</dt>
+            <dd>{PERSONA.prior}</dd>
+            <dt>Where, when</dt>
+            <dd>{PERSONA.context}</dd>
+            <dt>Wants</dt>
+            <dd>{PERSONA.motivation}</dd>
+          </dl>
+        </div>
+      </section>
+
       {/* design notes: spoilers, so closed while a session is running */}
       <details className="notes mt-7" open={!midSession}>
         <summary>
