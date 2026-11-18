@@ -31,7 +31,7 @@ interface P {
 const VERDICT_TAG: Record<Verdict, { text: string; cls: string }> = {
   correct: { text: 'Holds', cls: 'bg-okbg text-ok' },
   partial: { text: 'Half way', cls: 'bg-warnbg text-warn' },
-  misconception: { text: 'Refuted by your data', cls: 'bg-[#f6ddd3] text-accent-dark' },
+  misconception: { text: 'Refuted by your data', cls: 'bg-[#fbe3da] text-accent-dark' },
   other: { text: 'Not supported yet', cls: 'bg-warnbg text-warn' },
 }
 
@@ -144,10 +144,10 @@ function AreaFigure() {
   return (
     <figure className="m-0">
       <svg viewBox="0 0 300 150" className="block w-full max-w-[340px]" role="img" aria-label="Range drawn as the area of a rectangle with sides horizontal velocity and time in the air">
-        <rect x={50} y={130 - 2 * h1} width={2 * w1} height={2 * h1} fill="#f1d9cf" stroke="var(--color-accent)" strokeWidth={1.4} />
+        <rect x={50} y={130 - 2 * h1} width={2 * w1} height={2 * h1} fill="#fbe3da" stroke="var(--color-accent)" strokeWidth={1.4} />
         <line x1={50 + w1} x2={50 + w1} y1={130 - 2 * h1} y2={130} className="fig-dash" />
         <line x1={50} x2={50 + 2 * w1} y1={130 - h1} y2={130 - h1} className="fig-dash" />
-        <rect x={50} y={130 - h1} width={w1} height={h1} fill="#d9dfe6" stroke="var(--color-ink)" strokeWidth={1.4} />
+        <rect x={50} y={130 - h1} width={w1} height={h1} fill="#e6e8eb" stroke="var(--color-ink)" strokeWidth={1.4} />
         <text x={50 + w1 / 2} y={130 - h1 / 2 + 4} textAnchor="middle" className="fig-text">
           35.3
         </text>
@@ -185,7 +185,7 @@ export function Home({ s, dispatch }: P) {
         </Heading>
 
         {inProgress ? (
-          <div className="sheet border-ink">
+          <div className="sheet boxed">
             <p className="label">Saved session</p>
             <p className="mt-1 text-lg">
               You stopped at <strong>{STEP_LABEL[s.step]}</strong>, {trialCount} trial{trialCount === 1 ? '' : 's'} recorded, <span className="num">{fmtTime(s.elapsed)}</span> used.
@@ -481,10 +481,10 @@ export function Interpret({ s, dispatch, mission }: P & { mission: MissionId }) 
     <div>
       <Heading kicker={`${m.title} · Interpret & revise`} title={gap.refuted ? 'Your prediction did not survive' : 'Your prediction held'} />
 
-      <section className={`sheet mb-5 ${gap.refuted ? 'border-accent' : 'border-ok'}`} aria-label="Prediction gap">
+      <section className={`sheet boxed mb-5 ${gap.refuted ? 'border-accent' : 'border-ok'}`} aria-label="Prediction gap">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="label">Prediction gap</p>
-          <span className={`rounded px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${gap.refuted ? 'bg-[#f6ddd3] text-accent-dark' : 'bg-okbg text-ok'}`}>
+          <span className={`rounded px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${gap.refuted ? 'bg-[#fbe3da] text-accent-dark' : 'bg-okbg text-ok'}`}>
             {gap.refuted ? 'Prediction refuted' : 'Prediction confirmed'}
           </span>
         </div>
@@ -568,7 +568,7 @@ export function Interpret({ s, dispatch, mission }: P & { mission: MissionId }) 
           )}
 
           {ms.resolved && (
-            <section className="sheet border-ink">
+            <section className="sheet boxed">
               <p className="label">{ms.verdict === 'correct' ? 'Model explanation' : 'Model explanation, using your own table'}</p>
               <p className="mt-1.5 text-[15px]">{ms.verdict === 'correct' || ms.verdict === 'partial' ? m.modelAnswer : modelFromOwnRows(mission, ms.trials)}</p>
               {mission === 'm1' && (
@@ -809,7 +809,7 @@ export function Debrief({ s, dispatch }: P) {
           <button className="btn mt-2" onClick={() => setShow(!show)} aria-expanded={show}>
             {show ? 'Hide derivation result' : 'Show derivation result'}
           </button>
-          {show && <p className="num mt-2 rounded border border-rule bg-white px-3 py-2 text-sm">{EXTENSION.result}</p>}
+          {show && <p className="num mt-2 border border-ink bg-white px-3 py-2 text-sm">{EXTENSION.result}</p>}
 
           <div className="mt-5 flex flex-wrap gap-3 border-t border-rule pt-4">
             <button className="btn" onClick={() => downloadLog(s)}>

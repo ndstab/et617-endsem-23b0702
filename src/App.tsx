@@ -33,6 +33,15 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Hatching for the cliff in every figure (textbook style). */}
+      <svg width="0" height="0" className="absolute" aria-hidden="true">
+        <defs>
+          <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="6" height="6" fill="#fff" />
+            <line x1="0" y1="0" x2="0" y2="6" stroke="#8b9198" strokeWidth="1" />
+          </pattern>
+        </defs>
+      </svg>
       <TopBar s={s} onPause={() => dispatch({ type: 'pause' })} onAbout={() => dispatch({ type: 'view', view: s.view === 'about' ? 'main' : 'about' })} />
 
       {over && !s.overDismissed && s.step !== 'debrief' && !showHome && s.view === 'main' && (
@@ -90,7 +99,7 @@ function TopBar({ s, onPause, onAbout }: { s: Session; onPause: () => void; onAb
   const over = s.elapsed >= SESSION_SECONDS
   const active = s.step !== 'home' && !s.paused
   return (
-    <header className="sticky top-0 z-10 border-b border-ink bg-sheet">
+    <header className="sticky top-0 z-10 border-b-[1.5px] border-ink bg-white">
       <div className="mx-auto flex max-w-[1180px] flex-wrap items-center gap-x-5 gap-y-2 px-5 py-2.5">
         <div className="flex items-center gap-2">
           <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">

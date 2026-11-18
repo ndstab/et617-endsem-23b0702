@@ -106,7 +106,7 @@ export default function Lab({ start, locks, trials, onRecord, counts = () => tru
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
       <div className="min-w-0">
-        <figure className="sheet overflow-hidden p-0">
+        <figure className="sheet boxed overflow-hidden !p-0">
           <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" role="img" aria-label="Projectile trajectory on the lab bench">
             {/* graph paper */}
             {xTicks.map((x) => (
