@@ -16,8 +16,12 @@ TOOL_INPUT_LIMIT = 1200
 TOOL_RESULT_LIMIT = 1500
 
 
+CUT_REMINDER = re.compile(r"<system-reminder[^>]*>.*", re.S)  # a reminder cut off when a tool result was shortened
+
+
 def clean(text):
-    return KEY.sub("sk-[REDACTED]", REMINDER.sub("", text)).strip()
+    text = CUT_REMINDER.sub("[app notice removed]", REMINDER.sub("", text))
+    return KEY.sub("sk-[REDACTED]", text).strip()
 
 
 def shorten(text, limit):
@@ -67,7 +71,7 @@ with open(src, encoding="utf-8") as f:
         only_tools = all(p.startswith("[tool result]") for p in parts)
         who = "TOOL OUTPUT" if only_tools else ("USER" if row["type"] == "user" else "ASSISTANT (Claude)")
         stamp = (row.get("timestamp") or "")[:19].replace("T", " ")
-        body = clean("\n\n".join(parts))
+        body = "\n\n".join(c for c in (clean(p) for p in parts) if c)
         if not body:
             continue
         lines.append(f"\n----- {who}  {stamp} UTC -----")
